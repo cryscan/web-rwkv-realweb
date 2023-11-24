@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 window.onload = () => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("-----test web rwkv-----");
     yield wasm_bindgen("./web_rwkv_bg.wasm");
     yield wasm_bindgen.InitWGPU();
     var req = yield fetch("assets/rwkv_vocab_v20230424.json");
@@ -19,4 +20,5 @@ window.onload = () => __awaiter(void 0, void 0, void 0, function* () {
     var bin = yield reqm.arrayBuffer();
     console.log("get model len=" + bin.byteLength);
     yield wasm_bindgen.LoadModel(new Uint8Array(bin));
+    yield wasm_bindgen.chat("试试说句话呢。");
 });

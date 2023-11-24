@@ -230,12 +230,16 @@ where
     let bot = &prompt.bot;
     let prompt = prompt.build();
 
+    //prompt 第一句话
     let mut tokens = vec![tokenizer.encode(prompt.as_bytes())?];
 
     println!("\n\nInstructions:\n\n+: Alternative reply\n-: Exit chatting\n\n------------");
     print!("{}", prompt);
     std::io::stdout().flush()?;
 
+    //打印？
+
+    //跑模型
     // run initial prompt
     loop {
         let logits = model.run(&mut tokens, &state)?;
@@ -243,6 +247,8 @@ where
             break;
         }
     }
+
+
     tokens[0].clear();
 
     let mut backed = state.back();
@@ -261,6 +267,7 @@ where
             std::io::stdin().read_line(&mut user_text)?;
             user_text = user_text.trim().into();
         }
+        //用户输入一行文字？
 
         if &user_text == "-" {
             break;
@@ -279,7 +286,11 @@ where
 
         let prompt = format!("{user}: {user_text}\n\n{bot}:");
         tokens[0].append(&mut tokenizer.encode(prompt.as_bytes())?);
+        //向量化prompt
 
+
+
+        //跑模型
         loop {
             let mut logits = loop {
                 let logits = model.run(&mut tokens, &state)?;
@@ -287,6 +298,8 @@ where
                     break logits;
                 }
             };
+
+            //这一段是在干啥？
             logits.iter_mut().for_each(|logits| {
                 if let Some(logits) = logits {
                     logits[0] = f32::NEG_INFINITY;
@@ -298,6 +311,7 @@ where
                 }
             });
 
+            //这一段总之是在输出
             let probs = model.softmax(logits)?;
             if let Some(probs) = &probs[0] {
                 let token = sampler.sample(probs);

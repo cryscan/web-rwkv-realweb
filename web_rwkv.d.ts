@@ -13,6 +13,10 @@ declare namespace wasm_bindgen {
 	* @param {Uint8Array} fileData
 	*/
 	export function LoadModel(fileData: Uint8Array): void;
+	/**
+	* @param {string} txt
+	*/
+	export function chat(txt: string): void;
 	
 }
 
@@ -23,6 +27,7 @@ declare interface InitOutput {
   readonly InitWGPU: () => number;
   readonly LoadTokenizer: (a: number, b: number) => void;
   readonly LoadModel: (a: number, b: number) => void;
+  readonly chat: (a: number, b: number) => void;
   readonly __wbindgen_malloc: (a: number, b: number) => number;
   readonly __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
   readonly __wbindgen_export_2: WebAssembly.Table;

@@ -1,4 +1,7 @@
+
+
 window.onload = async () => {
+    console.log("-----test web rwkv-----");
     await wasm_bindgen("./web_rwkv_bg.wasm");
     await wasm_bindgen.InitWGPU();
     var req = await fetch("assets/rwkv_vocab_v20230424.json");
@@ -10,4 +13,6 @@ window.onload = async () => {
     var bin = await reqm.arrayBuffer();
     console.log("get model len=" + bin.byteLength);
     await wasm_bindgen.LoadModel(new Uint8Array( bin));
+
+    await wasm_bindgen.chat("试试说句话呢。");
 }
