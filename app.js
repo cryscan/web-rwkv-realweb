@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 window.onload = () => __awaiter(void 0, void 0, void 0, function* () {
     console.log("-----test web rwkv-----");
-    yield wasm_bindgen("./web_rwkv_bg.wasm");
+    yield wasm_bindgen("./web_rwkv_realweb_bg.wasm");
     yield wasm_bindgen.InitWGPU();
     var req = yield fetch("assets/rwkv_vocab_v20230424.json");
     var txt = yield req.text();

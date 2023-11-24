@@ -2,7 +2,7 @@
 
 window.onload = async () => {
     console.log("-----test web rwkv-----");
-    await wasm_bindgen("./web_rwkv_bg.wasm");
+    await wasm_bindgen("./web_rwkv_realweb_bg.wasm");
     await wasm_bindgen.InitWGPU();
     var req = await fetch("assets/rwkv_vocab_v20230424.json");
     var txt = await req.text();
