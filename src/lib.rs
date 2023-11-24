@@ -118,7 +118,7 @@ pub fn load_model(data: &[u8]) {
                 STATE_VERSION = 4;
                 STATE_V4 = Some(state);
                 MODEL_V4 = Some(model);
-                console::log_1(&"LoadModel V4".into());
+                console::log_1(&"LoadModel V4 done.".into());
             }
         }
         ModelVersion::V5 => {
@@ -136,7 +136,7 @@ pub fn load_model(data: &[u8]) {
 }
 
 #[wasm_bindgen]
-pub fn chat(txt: &str) {
+pub async fn chat(txt: &str) {
     unsafe {
         if STATE_VERSION == 4 {
             let prompt = Prompt {
@@ -163,7 +163,8 @@ pub fn chat(txt: &str) {
                 prompt,
                 sampler,
                 txt,
-            );
+            )
+            .await;
         }
         if STATE_VERSION == 5 {
             let prompt=Prompt {
@@ -190,12 +191,13 @@ pub fn chat(txt: &str) {
                 prompt,
                 sampler,
                 txt,
-            );
+            )
+            .await;
         }
     }
 }
 
-fn chat_once<M, S>(
+async fn chat_once<M, S>(
     model: &M,
     state: &S,
     tokenizer: &Tokenizer,
@@ -224,7 +226,7 @@ where
     // 跑模型
     // run initial prompt
     loop {
-        let logits = model.run(&mut tokens, &state)?;
+        let logits = model.run(&mut tokens, &state).await?;
         if logits.iter().any(Option::is_some) {
             break;
         }
@@ -234,7 +236,7 @@ where
 
     tokens[0].clear();
 
-    let mut backed = state.back();
+    let mut backed = state.back().await;
     let mut last_user_text = String::from("Hi!");
     let mut last_tokens = vec![];
 
@@ -259,7 +261,7 @@ where
         user_text = last_user_text.clone();
         tokens = last_tokens.clone();
     } else {
-        backed = state.back();
+        backed = state.back().await;
         last_user_text = user_text.clone();
         last_tokens = tokens.clone();
     }
@@ -273,7 +275,7 @@ where
     // 跑模型
     loop {
         let mut logits = loop {
-            let logits = model.run(&mut tokens, &state)?;
+            let logits = model.run(&mut tokens, &state).await?;
             if logits.iter().any(Option::is_some) {
                 break logits;
             }
@@ -293,7 +295,7 @@ where
         });
 
         // 这一段总之是在输出
-        let probs = model.softmax(logits)?;
+        let probs = model.softmax(logits).await?;
         if let Some(probs) = &probs[0] {
             let token = sampler.sample(probs);
             let decoded = tokenizer.decode(&[token])?;
