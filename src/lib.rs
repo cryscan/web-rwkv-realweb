@@ -13,10 +13,10 @@ use web_rwkv::{
 };
 use web_sys::console;
 
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
+// #[wasm_bindgen]
+// extern "C" {
+//     fn alert(s: &str);
+// }
 
 static mut IV: i32 = 0;
 static mut CONTEXT: Option<Context> = None;
@@ -136,7 +136,7 @@ pub fn load_model(data: &[u8]) {
 }
 
 #[wasm_bindgen]
-pub async fn chat(txt: &str) {
+pub async fn Chat(txt: &str) -> String {
     unsafe {
         if STATE_VERSION == 4 {
             let prompt = Prompt {
@@ -156,7 +156,7 @@ pub async fn chat(txt: &str) {
                 presence_penalty: 0.5,
                 frequency_penalty: 0.5,
             };
-            let _ = chat_once(
+            let t = chat_once(
                 MODEL_V4.as_ref().unwrap(),
                 STATE_V4.as_ref().unwrap(),
                 TOKENIZER.as_ref().unwrap(),
@@ -165,6 +165,7 @@ pub async fn chat(txt: &str) {
                 txt,
             )
             .await;
+            return t.unwrap();
         }
         if STATE_VERSION == 5 {
             let prompt=Prompt {
@@ -184,7 +185,7 @@ pub async fn chat(txt: &str) {
                 presence_penalty: 0.5,
                 frequency_penalty: 0.5,
             };
-            let _ = chat_once(
+            let t = chat_once(
                 MODEL_V5.as_ref().unwrap(),
                 STATE_V5.as_ref().unwrap(),
                 TOKENIZER.as_ref().unwrap(),
@@ -193,7 +194,9 @@ pub async fn chat(txt: &str) {
                 txt,
             )
             .await;
+            return t.unwrap();
         }
+        return String::from("");
     }
 }
 

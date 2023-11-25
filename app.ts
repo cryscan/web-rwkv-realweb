@@ -14,5 +14,6 @@ window.onload = async () => {
     console.log("get model len=" + bin.byteLength);
     await wasm_bindgen.LoadModel(new Uint8Array( bin));
 
-    await wasm_bindgen.chat("试试说句话呢。");
+    var txt = await wasm_bindgen.Chat("hello.");
+    console.log("get chat=" + txt);
 }
