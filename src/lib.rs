@@ -136,7 +136,7 @@ pub fn load_model(data: &[u8]) {
 }
 
 #[wasm_bindgen]
-pub async fn Chat(txt: &str) -> String {
+pub async fn ChatOnce(txt: &str) -> String {
     unsafe {
         if STATE_VERSION == 4 {
             let prompt = Prompt {

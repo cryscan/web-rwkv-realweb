@@ -20,6 +20,8 @@ window.onload = () => __awaiter(void 0, void 0, void 0, function* () {
     var bin = yield reqm.arrayBuffer();
     console.log("get model len=" + bin.byteLength);
     yield wasm_bindgen.LoadModel(new Uint8Array(bin));
-    var txt = yield wasm_bindgen.Chat("hello.");
+    var txt = yield wasm_bindgen.ChatOnce("hello.");
     console.log("get chat=" + txt);
+    var txt2 = yield wasm_bindgen.ChatOnce("what is your name.");
+    console.log("get chat2=" + txt2);
 });
