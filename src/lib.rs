@@ -1,5 +1,6 @@
 use anyhow::Result;
 use itertools::Itertools;
+use wasm_bindgen_futures::js_sys;
 use std::{collections::HashMap, io::Write};
 use wasm_bindgen::prelude::*;
 // use wasm_bindgen::JsCast;
@@ -28,6 +29,15 @@ static mut MODEL_V5: Option<v5::Model> = None;
 static mut STATE_V5: Option<v5::ModelState> = None;
 static mut STATE_VERSION: i32 = 0;
 
+
+
+#[wasm_bindgen]
+pub fn testcallback(f:&js_sys::Function)
+{
+    let v =js_sys::JsString::from("abc");
+    f.call1(&JsValue::null(),&v);
+
+}
 #[wasm_bindgen(js_name = InitWGPU)]
 pub async fn init_wgpu() {
     console::log_1(&"hi".into());
@@ -103,40 +113,47 @@ where
 }
 
 #[wasm_bindgen(js_name = LoadModel)]
-pub fn load_model(data: &[u8]) {
-    console::log_1(&"LoadModel wait.".into());
+pub fn load_model(data: &[u8], infocall:&js_sys::Function) {
+    
+    //console::log_1(&"LoadModel wait.".into());
+    infocall.call1(&JsValue::null(),&js_sys::JsString::from("LoadModel begin"));
     let info = Loader::info(data).unwrap();
-    let v = format!("{:#?}", info);
-    console::log_2(&"LoadModel info.=".into(), &v.into());
+    let v = format!("LoadModel info.={:#?}", info);
+    //console::log_2(&"LoadModel info.=".into(), &v.into());
+    infocall.call1(&JsValue::null(),&js_sys::JsString::from(v));
     let context = unsafe { CONTEXT.as_ref().unwrap() };
     match info.version {
         ModelVersion::V4 => {
-            console::log_1(&"LoadModel V4 wait.".into());
+            //console::log_1(&"LoadModel V4 wait.".into());
+            infocall.call1(&JsValue::null(),&js_sys::JsString::from("LoadModel V4 wait."));
             let model: v4::Model = load_model_generic(context, &data, None, None, false).unwrap();
             let state: v4::ModelState = StateBuilder::new(context, model.info()).build();
             unsafe {
                 STATE_VERSION = 4;
                 STATE_V4 = Some(state);
                 MODEL_V4 = Some(model);
-                console::log_1(&"LoadModel V4 done.".into());
+                //console::log_1(&"LoadModel V4 done.".into());
+                infocall.call1(&JsValue::null(),&js_sys::JsString::from("LoadModel V4 done."));
             }
         }
         ModelVersion::V5 => {
-            console::log_1(&"LoadModel V5 wait.".into());
+            //console::log_1(&"LoadModel V5 wait.".into());
+            infocall.call1(&JsValue::null(),&js_sys::JsString::from("LoadModel V5 wait."));
             let model: v5::Model = load_model_generic(context, &data, None, None, false).unwrap();
             let state: v5::ModelState = StateBuilder::new(context, model.info()).build();
             unsafe {
                 STATE_VERSION = 5;
                 STATE_V5 = Some(state);
                 MODEL_V5 = Some(model);
-                console::log_1(&"LoadModel V5 done.".into());
+                //console::log_1(&"LoadModel V5 done.".into());
+                infocall.call1(&JsValue::null(),&js_sys::JsString::from("LoadModel V5 done."));
             }
         }
     }
 }
 
 #[wasm_bindgen]
-pub async fn ChatOnce(txt: &str) -> String {
+pub async fn ChatOnce(txt: &str,wordcall:&js_sys::Function) -> String {
     unsafe {
         if STATE_VERSION == 4 {
             let prompt = Prompt {
@@ -163,6 +180,7 @@ pub async fn ChatOnce(txt: &str) -> String {
                 prompt,
                 sampler,
                 txt,
+                wordcall,
             )
             .await;
             return t.unwrap();
@@ -192,6 +210,7 @@ pub async fn ChatOnce(txt: &str) -> String {
                 prompt,
                 sampler,
                 txt,
+                wordcall
             )
             .await;
             return t.unwrap();
@@ -207,6 +226,7 @@ async fn chat_once<M, S>(
     prompt: Prompt,
     sampler: Sampler,
     usertext: &str,
+    wordcall:&js_sys::Function,
 ) -> Result<String>
 where
     S: ModelState,
@@ -224,8 +244,11 @@ where
     std::io::stdout().flush()?;
 
     // 打印？
-    console::log_1(&format!("{:?}", tokens).into());
+    
+    //console::log_1(&format!("{:?}", tokens).into());
 
+    wordcall.call2(&JsValue::null(),&js_sys::JsString::from("info"),&js_sys::JsString::from(format!("{:?}", tokens)));
+   
     // 跑模型
     // run initial prompt
     loop {
@@ -235,8 +258,10 @@ where
         }
     }
 
-    console::log_1(&"Prefill done".into());
-
+    //console::log_1(&"Prefill done".into());
+    wordcall.call2(&JsValue::null(),&js_sys::JsString::from("info"),&js_sys::JsString::from("Prefill done"));
+   
+ 
     tokens[0].clear();
 
     let mut backed = state.back().await;
@@ -309,7 +334,8 @@ where
             std::io::stdout().flush()?;
 
             let v = format!("{}", word);
-            console::log_2(&"Output =".into(), &v.into());
+            //console::log_2(&"Output =".into(), &v.into());
+            wordcall.call2(&JsValue::null(),&js_sys::JsString::from("word"),&js_sys::JsString::from(v));
 
             tokens[0] = vec![token];
             let count = occurrences.get(&token).unwrap_or(&1);
