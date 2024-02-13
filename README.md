@@ -28,6 +28,7 @@ and put it under `assets/models`.
 To build and pack, run
 ```bash
 $ ./buildwasm.cmd
+$ npx tsc
 ```
 
 ## Run
