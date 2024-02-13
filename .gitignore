@@ -8,8 +8,3 @@ Cargo.lock
 /.github
 
 /pkg
-web_rwkv_realweb.js
-web_rwkv_realweb.d.ts
-web_rwkv_realweb_bg.wasm
-web_rwkv_rewlweb_bg.bin
-web_rwkv_rewlweb_bg.bytes
