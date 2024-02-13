@@ -27,18 +27,6 @@ impl StateId {
     }
 }
 
-#[wasm_bindgen(getter_with_clone)]
-#[derive(Debug, Clone)]
-pub struct Vocab(pub Vec<f32>);
-
-impl std::ops::Deref for Vocab {
-    type Target = [f32];
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
 #[derive(Debug)]
 pub struct Runtime<M, S, B>
 where
@@ -137,8 +125,8 @@ where
         self.tokenizer.decode(tokens)
     }
 
-    pub async fn run_one(&self, tokens: &[u16], state: StateId) -> Result<Vec<f32>, TensorError> {
-        self.checkout(state).await?;
+    pub async fn run_one(&self, tokens: &[u16], state: &StateId) -> Result<Vec<f32>, TensorError> {
+        self.checkout(*state).await?;
 
         let tokens = tokens.to_owned();
         let mut tokens = vec![ModelInput {
@@ -239,22 +227,29 @@ impl RuntimeExport {
         Ok(String::from_utf8_lossy(&temp).into())
     }
 
-    pub async fn run_one(&self, tokens: &[u16], state: StateId) -> Result<Vocab, TensorError> {
+    pub async fn run_one(
+        &self,
+        tokens: &[u16],
+        output: &mut [f32],
+        state: &StateId,
+    ) -> Result<(), TensorError> {
         let temp = match &self.0 {
             RuntimeUntyped::V4(rt) => rt.run_one(tokens, state).await,
             RuntimeUntyped::V5(rt) => rt.run_one(tokens, state).await,
             RuntimeUntyped::V6(rt) => rt.run_one(tokens, state).await,
         }?;
-        Ok(Vocab(temp))
+        output.copy_from_slice(&temp);
+        Ok(())
     }
 
-    pub async fn softmax_one(&self, input: Vocab) -> Result<Vocab, TensorError> {
+    pub async fn softmax_one(&self, input: &[f32], output: &mut [f32]) -> Result<(), TensorError> {
         let temp = match &self.0 {
             RuntimeUntyped::V4(rt) => rt.softmax_one(&input).await,
             RuntimeUntyped::V5(rt) => rt.softmax_one(&input).await,
             RuntimeUntyped::V6(rt) => rt.softmax_one(&input).await,
         }?;
-        Ok(Vocab(temp))
+        output.copy_from_slice(&temp);
+        Ok(())
     }
 }
 
