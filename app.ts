@@ -1,6 +1,6 @@
 var worker = new Worker('worker.js');
 worker.onmessage = function (e) {
-    (document.getElementById("response") as HTMLElement).innerText += e.data;
+    (document.getElementById("response") as HTMLElement).innerText = e.data;
     console.log(e.data);
 };
 

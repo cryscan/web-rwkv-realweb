@@ -1,6 +1,5 @@
 use anyhow::Result;
 use itertools::Itertools;
-use std::{cell::RefCell, collections::HashMap};
 use wasm_bindgen::prelude::*;
 use web_rwkv::{
     context::{ContextBuilder, Instance},
@@ -9,15 +8,13 @@ use web_rwkv::{
         ModelState, ModelVersion, Quant, StateBuilder,
     },
     tensor::TensorError,
-    tokenizer::{Tokenizer, TokenizerError},
 };
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct StateIdKind;
+use std::{cell::RefCell, collections::HashMap, future::Future, pin::Pin};
 
 #[wasm_bindgen]
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct StateId(uid::Id<StateIdKind>);
+pub struct StateId(uid::Id<StateId>);
 
 #[wasm_bindgen]
 impl StateId {
@@ -27,6 +24,19 @@ impl StateId {
     }
 }
 
+pub trait Runner {
+    fn run_one<'a>(
+        &'a self,
+        tokens: &'a [u16],
+        state: &'a StateId,
+    ) -> Pin<Box<dyn Future<Output = Result<Vec<f32>, TensorError>> + 'a>>;
+
+    fn softmax_one<'a>(
+        &'a self,
+        input: &'a [f32],
+    ) -> Pin<Box<dyn Future<Output = Result<Vec<f32>, TensorError>> + 'a>>;
+}
+
 #[derive(Debug)]
 pub struct Runtime<M, S, B>
 where
@@ -34,7 +44,6 @@ where
     S: ModelState<BackedState = B>,
     M: Model<State = S>,
 {
-    tokenizer: Tokenizer,
     model: M,
     state: (RefCell<StateId>, S),
     backed: RefCell<HashMap<StateId, B>>,
@@ -46,13 +55,7 @@ where
     S: ModelState<BackedState = B>,
     M: Model<State = S>,
 {
-    pub async fn new(
-        vocab: &str,
-        data: &[u8],
-        quant: usize,
-        quant_nf4: usize,
-        turbo: bool,
-    ) -> Result<Self> {
+    pub async fn new(data: &[u8], quant: usize, quant_nf4: usize, turbo: bool) -> Result<Self> {
         let instance = Instance::new();
         let adapter = instance
             .adapter(web_rwkv::wgpu::PowerPreference::HighPerformance)
@@ -78,10 +81,7 @@ where
 
         let state = StateBuilder::new(&context, &info).with_num_batch(1).build();
 
-        let tokenizer = Tokenizer::new(vocab)?;
-
         Ok(Self {
-            tokenizer,
             model,
             state: (StateId::new().into(), state),
             backed: HashMap::new().into(),
@@ -115,14 +115,6 @@ where
         let id = *self.state.0.borrow();
         let backed = self.state.1.back().await;
         self.backed.borrow_mut().insert(id, backed);
-    }
-
-    pub fn encode(&self, input: &str) -> Result<Vec<u16>, TokenizerError> {
-        self.tokenizer.encode(input.as_bytes())
-    }
-
-    pub fn decode(&self, tokens: &[u16]) -> Result<Vec<u8>, TokenizerError> {
-        self.tokenizer.decode(tokens)
     }
 
     pub async fn run_one(&self, tokens: &[u16], state: &StateId) -> Result<Vec<f32>, TensorError> {
@@ -160,71 +152,59 @@ where
     }
 }
 
-#[derive(Debug)]
-pub enum RuntimeUntyped<'a> {
-    V4(Runtime<v4::Model<'a>, v4::ModelState, v4::BackedState>),
-    V5(Runtime<v5::Model<'a>, v5::ModelState, v5::BackedState>),
-    V6(Runtime<v6::Model<'a>, v6::ModelState, v6::BackedState>),
+impl<M, S, B> Runner for Runtime<M, S, B>
+where
+    B: BackedState,
+    S: ModelState<BackedState = B>,
+    M: Model<State = S>,
+{
+    fn run_one<'a>(
+        &'a self,
+        tokens: &'a [u16],
+        state: &'a StateId,
+    ) -> Pin<Box<dyn Future<Output = Result<Vec<f32>, TensorError>> + 'a>> {
+        Box::pin(self.run_one(tokens, state))
+    }
+
+    fn softmax_one<'a>(
+        &'a self,
+        input: &'a [f32],
+    ) -> Pin<Box<dyn Future<Output = Result<Vec<f32>, TensorError>> + 'a>> {
+        Box::pin(self.softmax_one(input))
+    }
 }
 
 #[wasm_bindgen(js_name = Runtime)]
-#[derive(Debug)]
-pub struct RuntimeExport(RuntimeUntyped<'static>);
-
-impl std::ops::Deref for RuntimeExport {
-    type Target = RuntimeUntyped<'static>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
+pub struct RuntimeExport(Box<dyn Runner>);
 
 #[wasm_bindgen(js_class = Runtime)]
 impl RuntimeExport {
     #[wasm_bindgen(constructor)]
     pub async fn new(
-        vocab: &str,
         data: &[u8],
         quant: usize,
         quant_nf4: usize,
         turbo: bool,
     ) -> Result<RuntimeExport, JsError> {
-        let err = |err: anyhow::Error| JsError::new(err.to_string().leak());
         let info = Loader::info(data).map_err(err)?;
-        Ok(match info.version {
-            ModelVersion::V4 => Self(RuntimeUntyped::V4(
-                Runtime::new(vocab, data, quant, quant_nf4, turbo)
+        let runtime = match info.version {
+            ModelVersion::V4 => Self(Box::new(
+                Runtime::<v4::Model, _, _>::new(data, quant, quant_nf4, turbo)
                     .await
                     .map_err(err)?,
             )),
-            ModelVersion::V5 => Self(RuntimeUntyped::V5(
-                Runtime::new(vocab, data, quant, quant_nf4, turbo)
+            ModelVersion::V5 => Self(Box::new(
+                Runtime::<v5::Model, _, _>::new(data, quant, quant_nf4, turbo)
                     .await
                     .map_err(err)?,
             )),
-            ModelVersion::V6 => Self(RuntimeUntyped::V6(
-                Runtime::new(vocab, data, quant, quant_nf4, turbo)
+            ModelVersion::V6 => Self(Box::new(
+                Runtime::<v6::Model, _, _>::new(data, quant, quant_nf4, turbo)
                     .await
                     .map_err(err)?,
             )),
-        })
-    }
-
-    pub fn encode(&self, input: &str) -> Result<Vec<u16>, TokenizerError> {
-        match &self.0 {
-            RuntimeUntyped::V4(rt) => rt.encode(input),
-            RuntimeUntyped::V5(rt) => rt.encode(input),
-            RuntimeUntyped::V6(rt) => rt.encode(input),
-        }
-    }
-
-    pub fn decode(&self, tokens: &[u16]) -> Result<String, TokenizerError> {
-        let temp = match &self.0 {
-            RuntimeUntyped::V4(rt) => rt.decode(tokens),
-            RuntimeUntyped::V5(rt) => rt.decode(tokens),
-            RuntimeUntyped::V6(rt) => rt.decode(tokens),
-        }?;
-        Ok(String::from_utf8_lossy(&temp).into())
+        };
+        Ok(runtime)
     }
 
     pub async fn run_one(
@@ -233,21 +213,13 @@ impl RuntimeExport {
         output: &mut [f32],
         state: &StateId,
     ) -> Result<(), TensorError> {
-        let temp = match &self.0 {
-            RuntimeUntyped::V4(rt) => rt.run_one(tokens, state).await,
-            RuntimeUntyped::V5(rt) => rt.run_one(tokens, state).await,
-            RuntimeUntyped::V6(rt) => rt.run_one(tokens, state).await,
-        }?;
+        let temp = self.0.run_one(tokens, state).await?;
         output.copy_from_slice(&temp);
         Ok(())
     }
 
     pub async fn softmax_one(&self, input: &[f32], output: &mut [f32]) -> Result<(), TensorError> {
-        let temp = match &self.0 {
-            RuntimeUntyped::V4(rt) => rt.softmax_one(&input).await,
-            RuntimeUntyped::V5(rt) => rt.softmax_one(&input).await,
-            RuntimeUntyped::V6(rt) => rt.softmax_one(&input).await,
-        }?;
+        let temp = self.0.softmax_one(input).await?;
         output.copy_from_slice(&temp);
         Ok(())
     }
@@ -337,4 +309,8 @@ impl Sampler {
             .unwrap_or_default();
         token as u16
     }
+}
+
+fn err(err: impl ToString) -> JsError {
+    JsError::new(&err.to_string())
 }
