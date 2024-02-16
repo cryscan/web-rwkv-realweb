@@ -8,3 +8,5 @@ Cargo.lock
 /.github
 
 /pkg
+app.js
+worker.js
