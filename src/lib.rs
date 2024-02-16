@@ -10,7 +10,12 @@ use web_rwkv::{
     tensor::TensorError,
 };
 
-use std::{cell::RefCell, collections::HashMap, future::Future, pin::Pin};
+use std::{
+    cell::{Cell, RefCell},
+    collections::HashMap,
+    future::Future,
+    pin::Pin,
+};
 
 #[wasm_bindgen]
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
@@ -45,7 +50,7 @@ where
     M: Model<State = S>,
 {
     model: M,
-    state: (RefCell<StateId>, S),
+    state: (Cell<StateId>, S),
     backed: RefCell<HashMap<StateId, B>>,
 }
 
@@ -89,12 +94,12 @@ where
     }
 
     async fn checkout(&self, id: StateId) -> Result<(), TensorError> {
-        if *self.state.0.borrow() == id {
+        if self.state.0.get() == id {
             return Ok(());
         }
 
         self.back().await;
-        *self.state.0.borrow_mut() = id;
+        self.state.0.set(id);
 
         let backed = self.backed.borrow();
         if let Some(backed) = backed.get(&id) {
@@ -112,7 +117,7 @@ where
     }
 
     async fn back(&self) {
-        let id = *self.state.0.borrow();
+        let id = self.state.0.get();
         let backed = self.state.1.back().await;
         self.backed.borrow_mut().insert(id, backed);
     }
