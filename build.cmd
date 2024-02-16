@@ -1,6 +1,9 @@
-@echo ====build wasm====
+@echo ==== build wasm ====
 @set RUSTFLAGS=--cfg=web_sys_unstable_apis
 @wasm-pack build --release --target no-modules
+
+@echo ==== build typescript ====
+@npx tsc
 
 @REM @echo ====copy pkg files====
 @REM @copy pkg\web_rwkv_realweb.js web_rwkv_realweb.js
