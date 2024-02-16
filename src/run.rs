@@ -196,17 +196,17 @@ impl RuntimeExport {
         let info = Loader::info(data).map_err(err)?;
         let runtime = match info.version {
             ModelVersion::V4 => Self(Box::new(
-                Runtime::<v4::Model, _, _>::new(data, quant, quant_nf4, turbo)
+                Runtime::<v4::Model<f32>, _, _>::new(data, quant, quant_nf4, turbo)
                     .await
                     .map_err(err)?,
             )),
             ModelVersion::V5 => Self(Box::new(
-                Runtime::<v5::Model, _, _>::new(data, quant, quant_nf4, turbo)
+                Runtime::<v5::Model<f32>, _, _>::new(data, quant, quant_nf4, turbo)
                     .await
                     .map_err(err)?,
             )),
             ModelVersion::V6 => Self(Box::new(
-                Runtime::<v6::Model, _, _>::new(data, quant, quant_nf4, turbo)
+                Runtime::<v6::Model<f32>, _, _>::new(data, quant, quant_nf4, turbo)
                     .await
                     .map_err(err)?,
             )),

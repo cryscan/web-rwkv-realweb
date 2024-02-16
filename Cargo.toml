@@ -17,7 +17,7 @@ wasm-opt = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-web-rwkv = "0.6.9"
+web-rwkv = "0.6.10"
 bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 half = { version = "2.2", features = ["bytemuck"] }
 safetensors = "0.4"

@@ -1,6 +1,5 @@
 /target
 /.vscode
-Cargo.lock
 *.st
 *.safetensors
 /trace
