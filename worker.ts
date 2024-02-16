@@ -47,15 +47,17 @@ this.addEventListener("message", async function (e) {
     var logits = new Float32Array(65536);
     var probs = new Float32Array(65536);
 
-    while (!out.includes("\n\n") && out.length < 500) {
-        await runtime.run_one(tokens, logits, state);
-        await runtime.softmax_one(logits, probs);
+    await this.navigator.locks.request("model", async (lock) => {
+        while (!out.includes("\n\n") && out.length < 500) {
+            await runtime.run_one(tokens, logits, state);
+            await runtime.softmax_one(logits, probs);
 
-        let out_token = sampler.sample(probs);
-        let word = tokenizer.decode(new Uint16Array([out_token]));
-        tokens = new Uint16Array([out_token]);
+            let out_token = sampler.sample(probs);
+            let word = tokenizer.decode(new Uint16Array([out_token]));
+            tokens = new Uint16Array([out_token]);
 
-        out += decoder.decode(word);
-    }
+            out += decoder.decode(word);
+        }
+    });
     postMessage(out);
 }, false);
