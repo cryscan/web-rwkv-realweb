@@ -34,21 +34,22 @@ this.addEventListener("message", async function (e) {
     var input = e.data as string;
     console.log(input);
 
-    var prompt = `User: ${input}\n\nAssistant:`;
+    var prompt = `User: Hi!\n\nAssistant: Hello! I'm your AI assistant. I'm here to help you with various tasks, such as answering questions, brainstorming ideas, drafting emails, writing code, providing advice, and much more.\n\nUser: ${input}\n\nAssistant:`;
     var state = new StateId;
 
     var encoder = new TextEncoder;
     var decoder = new TextDecoder;
 
     var tokens = tokenizer.encode(encoder.encode(prompt));
-    var out = "";
+    var response = "";
+    var out = []
     console.log(`prompt length: ${tokens.length}`);
 
     var logits = new Float32Array(65536);
     var probs = new Float32Array(65536);
 
     await this.navigator.locks.request("model", async (lock) => {
-        while (!out.includes("\n\n") && out.length < 500) {
+        while (!response.includes("\n\n") && out.length < 500) {
             await runtime.run_one(tokens, logits, state);
             await runtime.softmax_one(logits, probs);
 
@@ -56,8 +57,9 @@ this.addEventListener("message", async function (e) {
             let word = tokenizer.decode(new Uint16Array([out_token]));
             tokens = new Uint16Array([out_token]);
 
-            out += decoder.decode(word);
+            out.push(out_token);
+            response += decoder.decode(word);
         }
     });
-    postMessage(out);
+    postMessage(response);
 }, false);
