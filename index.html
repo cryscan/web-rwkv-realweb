@@ -1,14 +1,30 @@
 <html>
-    <head>
-        <title>Web RWKV RealWeb</title>
-        <h1>Welcome to RWKV!</h1>
-        <form id="form">
-            <label>Enter your message:</label>
-            <input type="text" id="input" name="message" placeholder="Enter your message here...">
-            <button type="submit">Submit</button>
-        </form>
-        <p id="response"></p>
-        <script src="pkg/web_rwkv_realweb.js"></script>
-        <script src="app.js"></script>
-    </head>
+
+<head>
+    <title>Web RWKV RealWeb</title>
+    <h1>Welcome to RWKV!</h1>
+    <div id="model">
+        <div style="max-width:750px; margin-top:1rem;">Load model using a model URL. The URL must be a <u>direct</u>
+            link to the model file. I.e. it must contain <b>/resolve/</b>, not /blob/ and must end in <i>.st</i></div>
+        <div style="background:lightgrey; padding:0.5rem; width:fit-content;">
+            <input id="url" style="width:700px"
+                value="http://localhost:5500/assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st">
+            <!-- value="https://huggingface.co/cgisky/AI00_RWKV_V5/resolve/main/RWKV-5-World-0.4B-v2-20231113-ctx4096.st"> -->
+            <button id="load" onclick="load()">Load</button>
+        </div>
+    </div>
+    <div id="loading" , style="display: none;">
+        <div id="status">Initializing...</div>
+        <progress id="progress" value="1"></progress>
+    </div>
+    <form id="chat" , style="display: none;">
+        <label>Enter your message:</label>
+        <input type="text" id="input" name="message" placeholder="Enter your message here...">
+        <button type="submit">Submit</button>
+    </form>
+    <p id="response"></p>
+    <script src="pkg/web_rwkv_realweb.js"></script>
+    <script src="app.js"></script>
+</head>
+
 </html>
