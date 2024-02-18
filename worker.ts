@@ -26,7 +26,6 @@ async function make_runtime(blob: Blob) {
 }
 
 var _tokenizer = make_tokenizer();
-// var _runtime = make_runtime();
 var _runtime: undefined | Promise<wasm_bindgen.Runtime> = undefined;
 
 this.addEventListener("message", async function (e: MessageEvent<Blob | string>) {

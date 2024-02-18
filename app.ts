@@ -44,29 +44,6 @@ async function load() {
     let blob = new Blob(chunks);
     console.log(blob);
 
-    // const progress = function (e: ProgressEvent) {
-    //     var progress = document.getElementById("progress") as HTMLProgressElement;
-    //     var status = document.getElementById("status") as HTMLElement;
-    //     progress.value = e.loaded / e.total;
-    //     status.innerHTML = `Downloading... ${e.loaded * 1.0e-6} / ${e.total * 1.0e-6} MB`;
-    // };
-
-    // var blob = await download(url, function (e) {
-    //     var progress = document.getElementById("progress") as HTMLProgressElement;
-    //     var status = document.getElementById("status") as HTMLElement;
-    //     progress.value = e.loaded / e.total;
-    //     status.innerHTML = `Downloading... ${e.loaded * 1.0e-6} / ${e.total * 1.0e-6} MB`;
-    // });
-
-    // var blob = await cache.match(url).then(async (response) => {
-    //     if (response !== undefined) {
-    //         return response;
-    //     }
-    //     var res = await data;
-    //     cache.put(url, res);
-    //     return res;
-    // }).then(async (response) => new Blob([await response.arrayBuffer()]));
-
     downloadElem.style.display = "none";
     chatElem.style.display = "";
 
