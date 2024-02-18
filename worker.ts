@@ -11,27 +11,35 @@ async function make_tokenizer() {
     return new wasm_bindgen.Tokenizer(vocab);
 }
 
-async function make_runtime() {
+async function make_runtime(blob: Blob) {
     await wasm_bindgen("./pkg/web_rwkv_realweb_bg.wasm");
 
-    var req = await fetch("assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st");
-    var bin = await req.arrayBuffer();
+    // var req = await fetch("assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st");
+    // var bin = await req.arrayBuffer();
+    // console.log("model: ", bin.byteLength);
+    let bin = await blob.arrayBuffer();
     console.log("model: ", bin.byteLength);
 
-    var runtime = await new Runtime(new Uint8Array(bin), 0, 0, true);
+    let runtime = await new Runtime(new Uint8Array(bin), 0, 0, true);
     console.log("runtime loaded")
     return runtime;
 }
 
 var _tokenizer = make_tokenizer();
-var _runtime = make_runtime();
+// var _runtime = make_runtime();
+var _runtime: undefined | Promise<wasm_bindgen.Runtime> = undefined;
 
-this.addEventListener("message", async function (e) {
+this.addEventListener("message", async function (e: MessageEvent<Blob | string>) {
+    if (e.data instanceof Blob) {
+        _runtime = make_runtime(e.data);
+        return;
+    }
+
     var tokenizer = await _tokenizer;
-    var runtime = await _runtime;
+    var runtime = await _runtime!;
     var sampler = new Sampler(1.0, 0.5);
 
-    var input = e.data as string;
+    var input = e.data;
     console.log(input);
 
     var prompt = `User: Hi!\n\nAssistant: Hello! I'm your AI assistant. I'm here to help you with various tasks, such as answering questions, brainstorming ideas, drafting emails, writing code, providing advice, and much more.\n\nUser: ${input}\n\nAssistant:`;
