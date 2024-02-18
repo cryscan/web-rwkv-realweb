@@ -7,9 +7,6 @@ async function load() {
     const replyElem = document.getElementById("reply")!;
     var url = (document.getElementById("url") as HTMLInputElement).value;
 
-    modelElem.style.display = "none";
-    downloadElem.style.display = "";
-
     var cache = await caches.open("rwkv");
 
     let response = await cache.match(url).then(async (value) => {
@@ -23,6 +20,19 @@ async function load() {
         return response;
     });
     // let response = await fetch(url);
+
+    if ((response.status >= 200 && response.status < 300) || (response.status === 0 /* Loaded from local file */)) {
+        replyElem.innerText = "";
+        modelElem.style.display = "none";
+        downloadElem.style.display = "";
+    } else if (response.status === 404 && url.startsWith('http://localhost')) {
+        replyElem.innerText = "Model not found locally.";
+        return;
+    } else {
+        replyElem.innerText = "Incorrect URL.";
+        return;
+    }
+
     const reader = response.body!.getReader();
     const contentLength = +response.headers!.get('Content-Length')!;
 
@@ -38,7 +48,7 @@ async function load() {
         // console.log(`Received ${receivedLength} of ${contentLength}`)
 
         progressElem.value = receivedLength / contentLength;
-        statusElem.innerHTML = `Downloading... ${receivedLength * 1.0e-6} / ${contentLength * 1.0e-6} MB`;
+        statusElem.innerHTML = `<p>${url}</p><p>${receivedLength * 1.0e-6} / ${contentLength * 1.0e-6} MB</p>`;
     }
 
     let blob = new Blob(chunks);
@@ -60,5 +70,14 @@ async function load() {
         var input = inputElem.value;
         worker.postMessage(input);
     });
+}
 
+const urls = new Map([
+    ["v4", "https://huggingface.co/cgisky/RWKV-safetensors-fp16/resolve/main/RWKV-4-World-0.4B-v1-20230529-ctx4096.st"],
+    ["v5", "https://huggingface.co/cgisky/AI00_RWKV_V5/resolve/main/RWKV-5-World-0.4B-v2-20231113-ctx4096.st"],
+    ["v5 local", "http://localhost:5500/assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st"]
+]);
+
+function loadUrl(key: string) {
+    (document.getElementById("url") as HTMLInputElement).value = urls.get(key)!;
 }

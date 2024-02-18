@@ -34,6 +34,12 @@ this.addEventListener("message", async function (e: MessageEvent<Blob | string>)
         return;
     }
 
+    if (await _runtime === undefined) {
+        this.postMessage(null);
+        this.postMessage("Error: Model is not loaded.");
+        return;
+    }
+
     var tokenizer = await _tokenizer;
     var runtime = await _runtime!;
     var sampler = new Sampler(1.0, 0.5);

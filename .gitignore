@@ -7,5 +7,3 @@
 /.github
 
 /pkg
-app.js
-worker.js

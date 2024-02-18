@@ -2,8 +2,58 @@
 
 <head>
     <title>Web RWKV RealWeb</title>
-    <h1>Welcome to RWKV!</h1>
+    <h1>Web-RWKV In-Browser</h1>
+    <div style="max-width:750px; margin-top:1rem;">
+        <p>Welcome to the Web-RWKV demo in browser!
+            Check <a href="https://github.com/cryscan/web-rwkv-realweb" target="_blank">the Github repo</a> for more
+            details
+            about this demo.</p>
+        <p>Note that this demo runs on WebGPU so make sure that your browser support it before running (See <a
+                href="https://webgpureport.org/" target="_blank">WebGPU Report</a>).</p>
+        <p>Thanks to <a href="https://github.com/josephrocca/rwkv-v4-web" target="_blank">josephrocca</a> for the first
+            awesome in-browser implementation and the website (I am totally unfamiliar with web dev LoL).</p>
+    </div>
     <div id="model">
+        <table id="modelTable">
+            <tr style="font-weight:bold;">
+                <td>Name</td>
+                <td>Source</td>
+                <td>Params</td>
+                <td>File size</td>
+            </tr>
+            <tr>
+                <td>RWKV-4-World-0.4B-v1-20230529-ctx4096</td>
+                <td>HuggingFace</td>
+                <td>0.4 B</td>
+                <td>923 MB</td>
+                <td><button onclick="loadUrl('v4')">Load</button></td>
+            </tr>
+            <tr>
+                <td>RWKV-5-World-0.4B-v2-20231113-ctx4096</td>
+                <td>HuggingFace</td>
+                <td>0.4 B</td>
+                <td>923 MB</td>
+                <td><button onclick="loadUrl('v5')">Load</button></td>
+            </tr>
+            <tr>
+                <td>RWKV-5-World-0.4B-v2-20231113-ctx4096</td>
+                <td>Local Server</td>
+                <td>0.4 B</td>
+                <td>923 MB</td>
+                <td><button onclick="loadUrl('v5 local')">Load</button></td>
+            </tr>
+        </table>
+        <style>
+            #modelTable {
+                border-collapse: collapse;
+                margin-top: 1rem;
+            }
+
+            #modelTable td,
+            #modelTable th {
+                border: 1px solid grey;
+            }
+        </style>
         <div style="max-width:750px; margin-top:1rem;">Load model using a model URL. The URL must be a <u>direct</u>
             link to the model file. I.e. it must contain <b>/resolve/</b>, not /blob/ and must end in <i>.st</i></div>
         <div style="background:lightgrey; padding:0.5rem; width:fit-content;">
@@ -18,12 +68,14 @@
         <div id="status">Initializing...</div>
         <progress id="progress" value="1"></progress>
     </div>
-    <form id="chat" style="display: none;">
-        <label>Enter your message:</label>
-        <input type="text" id="input" name="message" placeholder="Enter your message here...">
-        <button type="submit">Submit</button>
-    </form>
-    <p id="reply"></p>
+    <div style="max-width:750px; margin-top:1rem;">
+        <form id="chat" style="display: none;">
+            <label>Enter your message:</label>
+            <input type="text" id="input" name="message" style="width:500px;" value="Where is the Eiffel Tower?">
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div style="max-width:750px; margin-top:1rem;" id="reply"></div>
     <script src="pkg/web_rwkv_realweb.js"></script>
     <script src="app.js"></script>
 </head>
