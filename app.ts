@@ -1,3 +1,7 @@
+interface LoadOk {
+    ok: undefined
+}
+
 async function load() {
     const modelElem = document.getElementById("model")!;
     const downloadElem = document.getElementById("download")!;
@@ -58,7 +62,7 @@ async function load() {
     chatElem.style.display = "";
 
     var worker = new Worker('worker.js');
-    worker.onmessage = (e) => {
+    worker.onmessage = (e: MessageEvent<string | null>) => {
         e.data ? replyElem.innerText += e.data : replyElem.innerText = "";
     };
 
