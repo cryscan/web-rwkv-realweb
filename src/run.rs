@@ -1,5 +1,6 @@
 use anyhow::Result;
 use itertools::Itertools;
+use safetensors::SafeTensors;
 use wasm_bindgen::prelude::*;
 use web_rwkv::{
     context::{ContextBuilder, Instance},
@@ -62,13 +63,18 @@ where
     S: ModelState<BackedState = B>,
     M: Model<State = S>,
 {
-    pub async fn new(data: &[u8], quant: usize, quant_nf4: usize, turbo: bool) -> Result<Self> {
+    pub async fn new(
+        model: SafeTensors<'_>,
+        quant: usize,
+        quant_nf4: usize,
+        turbo: bool,
+    ) -> Result<Self> {
         let instance = Instance::new();
         let adapter = instance
             .adapter(web_rwkv::wgpu::PowerPreference::HighPerformance)
             .await
             .unwrap();
-        let info = Loader::info(data)?;
+        let info = Loader::info(&model)?;
 
         let context = ContextBuilder::new(adapter)
             .with_auto_limits(&info)
@@ -81,7 +87,7 @@ where
             .map(|layer| (layer, Quant::NF4))
             .collect_vec();
         let quant = quant.into_iter().chain(quant_nf4.into_iter()).collect();
-        let model = ModelBuilder::new(&context, data)
+        let model = ModelBuilder::new(&context, &model)
             .with_quant(quant)
             .with_turbo(turbo)
             .build()?;
@@ -193,20 +199,21 @@ impl RuntimeExport {
         quant_nf4: usize,
         turbo: bool,
     ) -> Result<RuntimeExport, JsError> {
-        let info = Loader::info(data).map_err(err)?;
+        let model = SafeTensors::deserialize(data)?;
+        let info = Loader::info(&model).map_err(err)?;
         let runtime = match info.version {
             ModelVersion::V4 => Self(Box::new(
-                Runtime::<v4::Model<f32>, _, _>::new(data, quant, quant_nf4, turbo)
+                Runtime::<v4::Model<f32>, _, _>::new(model, quant, quant_nf4, turbo)
                     .await
                     .map_err(err)?,
             )),
             ModelVersion::V5 => Self(Box::new(
-                Runtime::<v5::Model<f32>, _, _>::new(data, quant, quant_nf4, turbo)
+                Runtime::<v5::Model<f32>, _, _>::new(model, quant, quant_nf4, turbo)
                     .await
                     .map_err(err)?,
             )),
             ModelVersion::V6 => Self(Box::new(
-                Runtime::<v6::Model<f32>, _, _>::new(data, quant, quant_nf4, turbo)
+                Runtime::<v6::Model<f32>, _, _>::new(model, quant, quant_nf4, turbo)
                     .await
                     .map_err(err)?,
             )),
