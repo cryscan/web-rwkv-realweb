@@ -43,6 +43,8 @@ jobs:
           toolchain: stable
           override: true
           target: wasm32-unknown-unknown
+      - name: Install wasm-pack
+        run: cargo install wasm-pack
       - name: Build
         run: |
           RUSTFLAGS=--cfg=web_sys_unstable_apis cargo build --release --target no-modules
