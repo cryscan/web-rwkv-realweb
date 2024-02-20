@@ -17,7 +17,6 @@ use std::{
     cell::{Cell, RefCell},
     collections::HashMap,
     future::Future,
-    ops::DerefMut,
     pin::Pin,
 };
 
@@ -32,16 +31,15 @@ pub struct JsBufferView {
 #[wasm_bindgen]
 impl JsBufferView {
     #[wasm_bindgen(constructor)]
-    pub fn from_u8_slice(buf: &[u8]) -> Self {
+    pub fn new(buf: &[u8]) -> Self {
         Self {
             ptr: buf.as_ptr(),
             len: buf.len(),
         }
     }
 
-    #[wasm_bindgen(constructor)]
     pub fn from_str(str: &str) -> Self {
-        Self::from_u8_slice(str.as_bytes())
+        Self::new(str.as_bytes())
     }
 }
 
