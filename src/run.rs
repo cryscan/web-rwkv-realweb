@@ -1,24 +1,102 @@
 use anyhow::Result;
 use itertools::Itertools;
-use safetensors::SafeTensors;
+use safetensors::{tensor::TensorView, SafeTensorError, SafeTensors};
 use wasm_bindgen::prelude::*;
 use web_rwkv::{
     context::{ContextBuilder, Instance},
     model::{
-        loader::Loader, v4, v5, v6, BackedState, Model, ModelBuilder, ModelInput, ModelOutput,
-        ModelState, ModelVersion, Quant, StateBuilder,
+        loader::{Loader, Reader},
+        v4, v5, v6, BackedState, Model, ModelBuilder, ModelInput, ModelOutput, ModelState,
+        ModelVersion, Quant, StateBuilder,
     },
     tensor::TensorError,
 };
 
 use std::{
+    borrow::Borrow,
     cell::{Cell, RefCell},
     collections::HashMap,
     future::Future,
+    ops::DerefMut,
     pin::Pin,
 };
 
 use crate::err;
+
+#[wasm_bindgen]
+pub struct JsBufferView {
+    pub ptr: *const u8,
+    pub len: usize,
+}
+
+#[wasm_bindgen]
+impl JsBufferView {
+    #[wasm_bindgen(constructor)]
+    pub fn from_u8_slice(buf: &[u8]) -> Self {
+        Self {
+            ptr: buf.as_ptr(),
+            len: buf.len(),
+        }
+    }
+
+    #[wasm_bindgen(constructor)]
+    pub fn from_str(str: &str) -> Self {
+        Self::from_u8_slice(str.as_bytes())
+    }
+}
+
+impl Borrow<[u8]> for JsBufferView {
+    fn borrow(&self) -> &[u8] {
+        unsafe { &*std::ptr::slice_from_raw_parts(self.ptr, self.len) }
+    }
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_name = TensorReader)]
+    pub type JsTensorReader;
+
+    pub fn names(this: &JsTensorReader) -> Vec<JsBufferView>;
+    pub fn tensor(this: &JsTensorReader, name: &str) -> JsBufferView;
+}
+
+struct TensorReader {
+    reader: JsTensorReader,
+    blobs: RefCell<Vec<RefCell<Vec<u8>>>>,
+}
+
+impl Reader for TensorReader {
+    fn names(&self) -> Vec<&str> {
+        let names = unsafe { names(&self.reader) };
+        for name in names {
+            let name: &[u8] = name.borrow();
+
+            let id = self
+                .blobs
+                .borrow()
+                .iter()
+                .find_position(|blob| blob.try_borrow_mut().is_ok())
+                .map(|x| x.0);
+            let id = match id {
+                Some(id) => id,
+                None => {
+                    let mut blobs = self.blobs.borrow_mut();
+                    blobs.push(RefCell::new(vec![]));
+                    blobs.len() - 1
+                }
+            };
+            let blobs = self.blobs.borrow();
+            let mut blob = blobs[id].borrow_mut();
+            blob.resize(name.len(), 0);
+            blob.copy_from_slice(name);
+        }
+        todo!()
+    }
+
+    fn tensor<'a>(&'a self, name: &str) -> Result<TensorView<'a>, SafeTensorError> {
+        todo!()
+    }
+}
 
 #[wasm_bindgen]
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
