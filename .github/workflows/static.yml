@@ -44,7 +44,9 @@ jobs:
           override: true
           target: wasm32-unknown-unknown
       - name: Build
-        run: ./build.bash
+        run: |
+          RUSTFLAGS=--cfg=web_sys_unstable_apis cargo build --release --target no-modules
+          npx tsc
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
