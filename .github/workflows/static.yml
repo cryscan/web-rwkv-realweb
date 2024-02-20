@@ -35,19 +35,16 @@ jobs:
         run: sudo apt-get update -yq --allow-releaseinfo-change
       - name: Install Node.js
         uses: actions/setup-node@v4.0.2
-      - name: NPM or Yarn install with caching
-        uses: bahmutov/npm-install@v1.6.0
-        with:
-          install-command: 'npm install -g typescript'
+      - name: Install Typescript
+        run: npm install -g typescript
       - name: Install Rust
-      - uses: actions-rs/toolchain@v1
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
           target: wasm32-unknown-unknown
       - name: Build
-      - run: |
-          ./build.bash
+        run: ./build.bash
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Upload artifact
