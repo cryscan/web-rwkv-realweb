@@ -1,8 +1,69 @@
 importScripts("./pkg/web_rwkv_realweb.js")
 
-const { Runtime, Sampler, StateId } = wasm_bindgen;
+const { Runtime, Sampler, StateId, Tensor, TensorReader } = wasm_bindgen;
 
-async function make_tokenizer() {
+function getUint64(dataview: DataView, byteOffset: number, littleEndian?: boolean) {
+    // split 64-bit number into two 32-bit (4-byte) parts
+    const left = dataview.getUint32(byteOffset, littleEndian);
+    const right = dataview.getUint32(byteOffset + 4, littleEndian);
+
+    // combine the two 32-bit values
+    const combined = littleEndian
+        ? left + 2 ** 32 * right
+        : 2 ** 32 * left + right;
+
+    if (!Number.isSafeInteger(combined))
+        console.warn(combined, "exceeds MAX_SAFE_INTEGER. Precision may be lost");
+
+    return combined;
+}
+
+interface TensorInfo {
+    shape: Uint32Array;
+    data_offsets: [number, number];
+}
+
+var names;
+var tensor;
+
+async function initReader(blob: Blob) {
+    console.log("model: ", blob.size);
+
+    if (blob.size < 8) {
+        throw "header too small";
+    }
+
+    let n = getUint64(new DataView(await blob.slice(0, 8).arrayBuffer()), 0, true);
+    if (n > 100000000) {
+        throw "header too large";
+    }
+    if (n > blob.size) {
+        throw "invalid header len";
+    }
+
+    let str = new TextDecoder().decode(new Uint8Array(await blob.slice(8, n + 8).arrayBuffer()));
+    console.log(str);
+
+    let metadata = JSON.parse(str);
+    console.log(metadata);
+
+    let tensors = new Array();
+    for (let name in metadata) {
+        if (name !== "__metadata__") {
+            let info: TensorInfo = metadata[name];
+            let start = 8 + n + info.data_offsets[0];
+            let end = 8 + n + info.data_offsets[1];
+            let data = await blob.slice(start, end).arrayBuffer();
+            let buffer = new Uint8Array(data);
+            let tensor = new Tensor(name, info.shape, buffer);
+            tensors.push(tensor);
+        }
+    }
+
+    return new TensorReader(tensors);
+}
+
+async function initTokenizer() {
     await wasm_bindgen("./pkg/web_rwkv_realweb_bg.wasm");
 
     var req = await fetch("assets/rwkv_vocab_v20230424.json");
@@ -11,26 +72,25 @@ async function make_tokenizer() {
     return new wasm_bindgen.Tokenizer(vocab);
 }
 
-async function make_runtime(blob: Blob) {
+async function initRuntime(blob: Blob) {
     await wasm_bindgen("./pkg/web_rwkv_realweb_bg.wasm");
 
     // var req = await fetch("assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st");
     // var bin = await req.arrayBuffer();
     // console.log("model: ", bin.byteLength);
-    let bin = await blob.arrayBuffer();
-    console.log("model: ", bin.byteLength);
 
-    let runtime = await new Runtime(new Uint8Array(bin), 0, 0, true);
+    let reader = await initReader(blob);
+    let runtime = await new Runtime(reader, 0, 0, true);
     console.log("runtime loaded")
     return runtime;
 }
 
-var _tokenizer = make_tokenizer();
+var _tokenizer = initTokenizer();
 var _runtime: undefined | Promise<wasm_bindgen.Runtime> = undefined;
 
 this.addEventListener("message", async function (e: MessageEvent<Blob | string>) {
     if (e.data instanceof Blob) {
-        _runtime = make_runtime(e.data);
+        _runtime = initRuntime(e.data);
         return;
     }
 

@@ -1,5 +1,6 @@
 use wasm_bindgen::prelude::*;
 
+pub mod loader;
 pub mod run;
 pub mod sampler;
 

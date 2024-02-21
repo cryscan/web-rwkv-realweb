@@ -79,7 +79,9 @@ async function load() {
 const urls = new Map([
     ["v4", "https://huggingface.co/cgisky/RWKV-safetensors-fp16/resolve/main/RWKV-4-World-0.4B-v1-20230529-ctx4096.st"],
     ["v5", "https://huggingface.co/cgisky/AI00_RWKV_V5/resolve/main/RWKV-5-World-0.4B-v2-20231113-ctx4096.st"],
-    ["v5 local", "http://localhost:5500/assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st"]
+    ["v5 1b5", "https://huggingface.co/cgisky/AI00_RWKV_V5/resolve/main/RWKV-5-World-1B5-v2-20231025-ctx4096.st"],
+    ["v5 local", "http://localhost:5500/assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st"],
+    ["v6 local", "http://localhost:5500/assets/models/RWKV-x060-World-1B6-v2-20240208-ctx4096.st"],
 ]);
 
 function loadUrl(key: string) {
