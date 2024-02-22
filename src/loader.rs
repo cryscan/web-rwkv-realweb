@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, future::Future, pin::Pin};
 
 use safetensors::{tensor::TensorView, Dtype, SafeTensorError};
 use wasm_bindgen::prelude::*;
@@ -47,11 +47,21 @@ impl Reader for TensorReader {
         self.names.iter().map(AsRef::as_ref).collect()
     }
 
-    fn tensor<'a>(&'a self, name: &str) -> Result<TensorView<'a>, SafeTensorError> {
-        let JsTensor { shape, data, .. } = self
-            .tensors
-            .get(name)
-            .ok_or(SafeTensorError::TensorNotFound(name.to_string()))?;
-        TensorView::new(Dtype::F16, shape.clone(), data)
+    fn contains(&self, name: &str) -> bool {
+        self.names.contains(&name.to_string())
+    }
+
+    fn tensor<'a>(
+        &'a self,
+        name: &str,
+    ) -> Pin<Box<dyn Future<Output = Result<TensorView<'a>, SafeTensorError>> + 'a>> {
+        let name = name.to_string();
+        Box::pin(async move {
+            let JsTensor { shape, data, .. } = self
+                .tensors
+                .get(&name)
+                .ok_or(SafeTensorError::TensorNotFound(name))?;
+            TensorView::new(Dtype::F16, shape.clone(), data)
+        })
     }
 }

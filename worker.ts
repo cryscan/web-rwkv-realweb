@@ -27,7 +27,7 @@ var names;
 var tensor;
 
 async function initReader(blob: Blob) {
-    console.log("model: ", blob.size);
+    console.log("model data size: ", blob.size);
 
     if (blob.size < 8) {
         throw "header too small";
@@ -42,10 +42,7 @@ async function initReader(blob: Blob) {
     }
 
     let str = new TextDecoder().decode(new Uint8Array(await blob.slice(8, n + 8).arrayBuffer()));
-    console.log(str);
-
     let metadata = JSON.parse(str);
-    console.log(metadata);
 
     let tensors = new Array();
     for (let name in metadata) {

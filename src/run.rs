@@ -74,7 +74,7 @@ where
             .adapter(web_rwkv::wgpu::PowerPreference::HighPerformance)
             .await
             .unwrap();
-        let info = Loader::info(&model)?;
+        let info = Loader::info(&model).await?;
 
         let context = ContextBuilder::new(adapter)
             .with_auto_limits(&info)
@@ -90,7 +90,8 @@ where
         let model = ModelBuilder::new(&context, &model)
             .with_quant(quant)
             .with_turbo(turbo)
-            .build()?;
+            .build()
+            .await?;
 
         let state = StateBuilder::new(&context, &info).with_num_batch(1).build();
 
@@ -201,7 +202,7 @@ impl RuntimeExport {
         turbo: bool,
     ) -> Result<RuntimeExport, JsError> {
         // let model = SafeTensors::deserialize(data)?;
-        let info = Loader::info(&model).map_err(err)?;
+        let info = Loader::info(&model).await.map_err(err)?;
         let runtime = match info.version {
             ModelVersion::V4 => Self(Box::new(
                 Runtime::<v4::Model<f32>, _, _>::new(model, quant, quant_nf4, turbo)
