@@ -1,27 +1,27 @@
-use std::{collections::HashMap, future::Future, pin::Pin};
+use std::{borrow::Cow, collections::HashMap, future::Future, pin::Pin};
 
-use safetensors::{tensor::TensorView, Dtype, SafeTensorError};
+use js_sys::{Promise, Uint8Array};
+use safetensors::SafeTensorError;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen_futures::JsFuture;
 use web_rwkv::model::loader::Reader;
 
 #[wasm_bindgen(js_name = Tensor)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct JsTensor {
     name: String,
     shape: Vec<usize>,
-    data: Vec<u8>,
+    data: Promise,
 }
 
 #[wasm_bindgen(js_class = Tensor)]
 impl JsTensor {
     #[wasm_bindgen(constructor)]
-    pub fn new(name: String, shape: &[usize], data: &[u8]) -> Self {
-        let mut buf = vec![0; data.len()];
-        buf.copy_from_slice(data);
+    pub fn new(name: String, shape: &[usize], data: Promise) -> Self {
         Self {
             name,
             shape: shape.to_vec(),
-            data: buf,
+            data,
         }
     }
 }
@@ -54,14 +54,23 @@ impl Reader for TensorReader {
     fn tensor<'a>(
         &'a self,
         name: &str,
-    ) -> Pin<Box<dyn Future<Output = Result<TensorView<'a>, SafeTensorError>> + 'a>> {
+    ) -> Pin<Box<dyn Future<Output = Result<(Vec<usize>, Cow<'a, [u8]>), SafeTensorError>> + 'a>>
+    {
         let name = name.to_string();
         Box::pin(async move {
-            let JsTensor { shape, data, .. } = self
+            let tensor = self
                 .tensors
                 .get(&name)
-                .ok_or(SafeTensorError::TensorNotFound(name))?;
-            TensorView::new(Dtype::F16, shape.clone(), data)
+                .ok_or(SafeTensorError::TensorNotFound(name.clone()))?;
+
+            let value = JsFuture::from(tensor.data.clone())
+                .await
+                .map_err(|_| SafeTensorError::TensorNotFound(name))?;
+            let array = Uint8Array::new(&value);
+            let data = array.to_vec();
+
+            Ok((tensor.shape.clone(), data.into()))
+            // TensorView::new(Dtype::F16, shape.clone(), data)
         })
     }
 }

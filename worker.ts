@@ -23,9 +23,6 @@ interface TensorInfo {
     data_offsets: [number, number];
 }
 
-var names;
-var tensor;
-
 async function initReader(blob: Blob) {
     console.log("model data size: ", blob.size);
 
@@ -50,9 +47,7 @@ async function initReader(blob: Blob) {
             let info: TensorInfo = metadata[name];
             let start = 8 + n + info.data_offsets[0];
             let end = 8 + n + info.data_offsets[1];
-            let data = await blob.slice(start, end).arrayBuffer();
-            let buffer = new Uint8Array(data);
-            let tensor = new Tensor(name, info.shape, buffer);
+            let tensor = new Tensor(name, info.shape, blob.slice(start, end).arrayBuffer());
             tensors.push(tensor);
         }
     }
