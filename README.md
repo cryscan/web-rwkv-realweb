@@ -2,6 +2,8 @@
 
 Run the RWKV model locally in browser.
 
+Check the [live demo](https://cryscan.github.io/web-rwkv-realweb/)!
+
 ## Dependencies
 
 ### `node.js` and `typescript`
