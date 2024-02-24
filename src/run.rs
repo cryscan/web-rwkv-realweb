@@ -5,15 +5,17 @@ use web_rwkv::{
     context::{ContextBuilder, Instance},
     model::{
         loader::{Loader, Reader},
-        v4, v5, v6, BackedState, Model, ModelBuilder, ModelInput, ModelOutput, ModelState,
-        ModelVersion, Quant, StateBuilder,
+        v4, v5, v6, BackedState, Build, BuildFuture, Model, ModelBuilder, ModelInput, ModelOutput,
+        ModelState, ModelVersion, Quant, StateBuilder,
     },
     tensor::TensorError,
+    wgpu::PowerPreference,
 };
 
 use std::{
     cell::{Cell, RefCell},
     collections::HashMap,
+    convert::Infallible,
     future::Future,
     pin::Pin,
 };
@@ -62,16 +64,21 @@ where
     B: BackedState,
     S: ModelState<BackedState = B>,
     M: Model<State = S>,
+    StateBuilder: Build<S, Error = Infallible>,
+    StateBuilder: Build<B, Error = Infallible>,
 {
     pub async fn new<R: Reader>(
         model: R,
         quant: usize,
         quant_nf4: usize,
         turbo: bool,
-    ) -> Result<Self> {
+    ) -> Result<Self>
+    where
+        ModelBuilder<R>: BuildFuture<M, Error = anyhow::Error>,
+    {
         let instance = Instance::new();
         let adapter = instance
-            .adapter(web_rwkv::wgpu::PowerPreference::HighPerformance)
+            .adapter(PowerPreference::HighPerformance)
             .await
             .unwrap();
         let info = Loader::info(&model).await?;
@@ -87,13 +94,16 @@ where
             .map(|layer| (layer, Quant::NF4))
             .collect_vec();
         let quant = quant.into_iter().chain(quant_nf4.into_iter()).collect();
-        let model = ModelBuilder::new(&context, &model)
+        let model = ModelBuilder::new(&context, model)
             .with_quant(quant)
             .with_turbo(turbo)
             .build()
             .await?;
 
-        let state = StateBuilder::new(&context, &info).with_num_batch(1).build();
+        let state = StateBuilder::new(&context, &info)
+            .with_num_batch(1)
+            .build()
+            .unwrap();
 
         Ok(Self {
             model,
@@ -118,7 +128,8 @@ where
             let info = self.model.info();
             let backed = StateBuilder::new(context, info)
                 .with_num_batch(1)
-                .build_backed();
+                .build()
+                .unwrap();
             self.state.1.load(&backed)?;
         }
 
@@ -171,6 +182,8 @@ where
     B: BackedState,
     S: ModelState<BackedState = B>,
     M: Model<State = S>,
+    StateBuilder: Build<S, Error = Infallible>,
+    StateBuilder: Build<B, Error = Infallible>,
 {
     fn run_one<'a>(
         &'a self,
