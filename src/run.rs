@@ -81,7 +81,7 @@ where
             .adapter(PowerPreference::HighPerformance)
             .await
             .unwrap();
-        let info = Loader::info(&model).await?;
+        let info = Loader::info(&model)?;
 
         let context = ContextBuilder::new(adapter)
             .with_auto_limits(&info)
@@ -215,7 +215,7 @@ impl RuntimeExport {
         turbo: bool,
     ) -> Result<RuntimeExport, JsError> {
         // let model = SafeTensors::deserialize(data)?;
-        let info = Loader::info(&model).await.map_err(err)?;
+        let info = Loader::info(&model).map_err(err)?;
         let runtime = match info.version {
             ModelVersion::V4 => Self(Box::new(
                 Runtime::<v4::Model<f32>, _, _>::new(model, quant, quant_nf4, turbo)

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use js_sys::Uint8Array;
-use safetensors::SafeTensorError;
+use safetensors::{Dtype, SafeTensorError};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use web_rwkv::model::loader::{Reader, ReaderTensor};
@@ -52,6 +52,14 @@ impl Reader for TensorReader {
         self.names.contains(&name.to_string())
     }
 
+    fn shape(&self, name: &str) -> Result<Vec<usize>, SafeTensorError> {
+        let tensor = self
+            .tensors
+            .get(name)
+            .ok_or(SafeTensorError::TensorNotFound(name.to_string()))?;
+        Ok(tensor.shape.clone())
+    }
+
     async fn tensor(&self, name: &str) -> Result<ReaderTensor, SafeTensorError> {
         let tensor = self
             .tensors
@@ -64,7 +72,7 @@ impl Reader for TensorReader {
         let array = Uint8Array::new(&value);
         let data = array.to_vec();
 
-        Ok((tensor.shape.clone(), data.into()))
+        Ok((Dtype::F16, tensor.shape.clone(), data.into()))
         // TensorView::new(Dtype::F16, shape.clone(), data)
     }
 }
