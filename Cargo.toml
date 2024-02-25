@@ -1,15 +1,15 @@
 [package]
-name = "web-rwkv-realweb"
-version = "0.1.0"
-edition = "2021"
 authors = ["Zhenyuan Zhang <cryscan@umich.edu>"]
-license = "MIT OR Apache-2.0"
-description = "An implementation of the RWKV language model in pure WebGPU."
-homepage = "https://github.com/cryscan/web-rwkv"
-repository = "https://github.com/cryscan/web-rwkv"
-keywords = ["deep-learning", "language", "model", "rwkv"]
 categories = ["science", "text-processing"]
+description = "An implementation of the RWKV language model in pure WebGPU."
+edition = "2021"
 exclude = ["assets/", "crates/", "screenshots/"]
+homepage = "https://github.com/cryscan/web-rwkv"
+keywords = ["deep-learning", "language", "model", "rwkv"]
+license = "MIT OR Apache-2.0"
+name = "web-rwkv-realweb"
+repository = "https://github.com/cryscan/web-rwkv"
+version = "0.1.0"
 
 [package.metadata.wasm-pack.profile.release]
 wasm-opt = false
@@ -17,27 +17,27 @@ wasm-opt = false
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-web-rwkv = "0.6.21"
-bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
-half = { version = "2.2", features = ["bytemuck"] }
-safetensors = "0.4"
-flume = "0.11"
-regex = "1.8.4"
-uid = "0.1"
+anyhow = "1"
 bitflags = "2.3"
+bytemuck = { version = "1.13", features = ["extern_crate_alloc"] }
 derive-getters = "0.3"
+fastrand = { version = "2.0", features = ['js'] }
+flume = "0.11"
+half = { version = "2.2", features = ["bytemuck"] }
+itertools = "0.12"
+js-sys = "0.3"
 lazy_static = "1.4"
+log = "0.4"
+pollster = "0.3"
+regex = "1.8.4"
+safetensors = "0.4"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-anyhow = "1"
-itertools = "0.12"
-log = "0.4"
+uid = "0.1"
 wasm-bindgen = "0.2"
 wasm-bindgen-futures = "0.4"
-js-sys = "0.3"
-web-sys = { version = "0.3", features = ["console", "Blob"] }
-fastrand = { version = "2.0", features = ['js'] }
-pollster = "0.3"
+web-rwkv = "0.6.22"
+web-sys = { version = "0.3", features = ["Blob", "console"] }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
