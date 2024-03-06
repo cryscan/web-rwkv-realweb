@@ -80,9 +80,10 @@ async function initRuntime(blob: Blob) {
 var _tokenizer = initTokenizer();
 var _runtime: undefined | Promise<wasm_bindgen.Runtime> = undefined;
 
-this.addEventListener("message", async function (e: MessageEvent<Blob | string>) {
-    if (e.data instanceof Blob) {
-        _runtime = initRuntime(e.data);
+this.addEventListener("message", async function (e: MessageEvent<Uint8Array[] | String>) {
+    if (!(e.data instanceof String)) {
+        let blob = new Blob(e.data);
+        _runtime = initRuntime(blob);
         return;
     }
 

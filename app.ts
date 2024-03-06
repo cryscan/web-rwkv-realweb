@@ -55,9 +55,6 @@ async function load() {
         statusElem.innerHTML = `<p>${url}</p><p>${receivedLength * 1.0e-6} / ${contentLength * 1.0e-6} MB</p>`;
     }
 
-    let blob = new Blob(chunks);
-    console.log(blob);
-
     downloadElem.style.display = "none";
     chatElem.style.display = "";
 
@@ -66,12 +63,12 @@ async function load() {
         e.data ? replyElem.innerText += e.data : replyElem.innerText = "";
     };
 
-    worker.postMessage(blob);
+    worker.postMessage(chunks, chunks.map(x => x.buffer));
 
     chatElem.addEventListener("submit", (e) => {
         e.preventDefault();
         const inputElem = document.getElementById("input") as HTMLInputElement;
-        var input = inputElem.value;
+        var input = new String(inputElem.value);
         worker.postMessage(input);
     });
 }
