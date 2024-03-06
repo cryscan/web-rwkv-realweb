@@ -81,7 +81,7 @@ var _tokenizer = initTokenizer();
 var _runtime: undefined | Promise<wasm_bindgen.Runtime> = undefined;
 
 this.addEventListener("message", async function (e: MessageEvent<Uint8Array[] | String>) {
-    if (!(e.data instanceof String)) {
+    if (e.data instanceof Array) {
         let blob = new Blob(e.data);
         _runtime = initRuntime(blob);
         return;
