@@ -506,6 +506,7 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "crunchy",
+ "serde",
 ]
 
 [[package]]
@@ -547,6 +548,18 @@ checksum = "233cf39063f058ea2caae4091bf4a3ef70a653afbc026f5c4a4135d114e3c177"
 dependencies = [
  "equivalent",
  "hashbrown",
+]
+
+[[package]]
+name = "instant"
+version = "0.1.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7a5bbe824c507c5da5956355e86a746d82e0e1464f65d862cc5e71da70e94b2c"
+dependencies = [
+ "cfg-if",
+ "js-sys",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
@@ -1168,9 +1181,9 @@ checksum = "4f186bd2dcf04330886ce82d6f33dd75a7bfcf69ecf5763b89fcde53b6ac9838"
 
 [[package]]
 name = "web-rwkv"
-version = "0.6.23"
+version = "0.6.29"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3af21fa3f40d1a2fb1cbe9e1fe5823f7694e1cc646a12cbce7b9f4987894a3f"
+checksum = "4b7efb589c790bb246db48892c4b4d51523cb89bbf25a2388dd603384cf97545"
 dependencies = [
  "ahash",
  "anyhow",
@@ -1181,6 +1194,7 @@ dependencies = [
  "futures",
  "gpp",
  "half",
+ "instant",
  "itertools",
  "lazy_static",
  "log",
@@ -1188,6 +1202,7 @@ dependencies = [
  "safetensors",
  "serde",
  "serde_json",
+ "thiserror",
  "trait-variant",
  "uid",
  "wasm-bindgen",
