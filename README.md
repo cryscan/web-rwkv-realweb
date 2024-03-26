@@ -1,6 +1,6 @@
 # Web-RWKV-RealWeb
 
-Run the RWKV model locally in browser.
+Run the RWKV model locally in browser on your GPU. This demo is built upon the [web-rwkv](https://github.com/cryscan/web-rwkv) inference engine.
 
 Check the [live demo](https://cryscan.github.io/web-rwkv-realweb/)!
 
