@@ -5,8 +5,8 @@ use web_rwkv::{
     context::{ContextBuilder, Instance},
     model::{
         loader::{Loader, Reader},
-        v4, v5, v6, BackedState, Build, BuildFuture, Model, ModelBuilder, ModelInput, ModelOutput,
-        ModelState, ModelVersion, Quant, StateBuilder,
+        v4, v5, v6, BackedState, Build, BuildFuture, ContextAutoLimits, Model, ModelBuilder,
+        ModelInput, ModelOutput, ModelState, ModelVersion, Quant, StateBuilder,
     },
     tensor::TensorError,
     wgpu::PowerPreference,

@@ -1076,6 +1076,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio"
+version = "1.37.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1adbebffeca75fcfd058afa480fb6c0b81e165a0323f9c9d39c9697e37c46787"
+dependencies = [
+ "backtrace",
+ "pin-project-lite",
+ "tokio-macros",
+]
+
+[[package]]
+name = "tokio-macros"
+version = "2.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5b8a1e28f2deaa14e508979454cb3a223b10b938b45af148bc0986de36f1923b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.50",
+]
+
+[[package]]
 name = "trait-variant"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1190,13 +1212,12 @@ checksum = "4f186bd2dcf04330886ce82d6f33dd75a7bfcf69ecf5763b89fcde53b6ac9838"
 
 [[package]]
 name = "web-rwkv"
-version = "0.6.34"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d35b0a8ea28bd689d4b5c607d08bcd7db876854bfe50349f3b26b7a8f2bcaab0"
+checksum = "fdc34d9b719647e5701472919074966f7c1ebccc28ffdd70d93d2f2cb877d8b1"
 dependencies = [
  "ahash",
  "anyhow",
- "bitflags 2.4.2",
  "bytemuck",
  "derive-getters",
  "flume",
@@ -1205,7 +1226,6 @@ dependencies = [
  "half",
  "instant",
  "itertools",
- "lazy_static",
  "log",
  "regex",
  "safetensors",
@@ -1213,6 +1233,7 @@ dependencies = [
  "serde_bytes",
  "serde_json",
  "thiserror",
+ "tokio",
  "trait-variant",
  "uid",
  "wasm-bindgen",
