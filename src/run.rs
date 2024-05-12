@@ -2,14 +2,14 @@ use anyhow::Result;
 use itertools::Itertools;
 use wasm_bindgen::prelude::*;
 use web_rwkv::{
-    context::{ContextBuilder, Instance},
+    context::{ContextBuilder, InstanceExt},
     model::{
         loader::{Loader, Reader},
         v4, v5, v6, BackedState, Build, BuildFuture, ContextAutoLimits, Model, ModelBuilder,
         ModelInput, ModelOutput, ModelState, ModelVersion, Quant, StateBuilder,
     },
     tensor::TensorError,
-    wgpu::PowerPreference,
+    wgpu::{Instance, PowerPreference},
 };
 
 use std::{
@@ -76,15 +76,15 @@ where
     where
         ModelBuilder<R>: BuildFuture<M, Error = anyhow::Error>,
     {
-        let instance = Instance::new();
+        let instance = Instance::new(Default::default());
         let adapter = instance
             .adapter(PowerPreference::HighPerformance)
             .await
-            .unwrap();
+            .expect("failed to request adapter");
         let info = Loader::info(&model)?;
 
         let context = ContextBuilder::new(adapter)
-            .with_auto_limits(&info)
+            .auto_limits(&info)
             .build()
             .await
             .unwrap();
@@ -95,8 +95,8 @@ where
             .collect_vec();
         let quant = quant.into_iter().chain(quant_nf4.into_iter()).collect();
         let model = ModelBuilder::new(&context, model)
-            .with_quant(quant)
-            .with_turbo(turbo)
+            .quant(quant)
+            .turbo(turbo)
             .build()
             .await?;
 

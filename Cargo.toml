@@ -39,9 +39,10 @@ wasm-bindgen-futures = "0.4"
 web-sys = { version = "0.3", features = ["Blob", "console"] }
 
 [dependencies.web-rwkv]
-# path = "../web-rwkv"
 default-features = false
-version = "0.7.3"
+features = ["web"]
+# path = "../web-rwkv"
+version = "0.8.9"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
