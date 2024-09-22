@@ -1,28 +1,27 @@
 use std::collections::HashMap;
 
-use js_sys::Uint8Array;
+use js_sys::{ArrayBuffer, Uint8Array};
 use safetensors::{Dtype, SafeTensorError};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::JsFuture;
 use web_rwkv::model::loader::{Reader, ReaderTensor};
-use web_sys::Blob;
 
 #[wasm_bindgen(js_name = Tensor)]
 #[derive(Debug, Clone)]
 pub struct JsTensor {
     name: String,
     shape: Vec<usize>,
-    blob: Blob,
+    buffer: ArrayBuffer,
 }
 
 #[wasm_bindgen(js_class = Tensor)]
 impl JsTensor {
     #[wasm_bindgen(constructor)]
-    pub fn new(name: String, shape: &[usize], blob: Blob) -> Self {
+    pub fn new(name: String, shape: &[usize], buffer: ArrayBuffer) -> Self {
+        let shape = shape.to_vec();
         Self {
             name,
-            shape: shape.to_vec(),
-            blob,
+            shape,
+            buffer,
         }
     }
 }
@@ -60,16 +59,13 @@ impl Reader for TensorReader {
         Ok(tensor.shape.clone())
     }
 
-    async fn tensor(&self, name: &str) -> Result<ReaderTensor, SafeTensorError> {
+    fn tensor(&self, name: &str) -> Result<ReaderTensor, SafeTensorError> {
         let tensor = self
             .tensors
             .get(name)
             .ok_or(SafeTensorError::TensorNotFound(name.to_string()))?;
 
-        let value = JsFuture::from(tensor.blob.array_buffer())
-            .await
-            .map_err(|_| SafeTensorError::TensorNotFound(name.to_string()))?;
-        let array = Uint8Array::new(&value);
+        let array = Uint8Array::new(&tensor.buffer);
         let data = array.to_vec();
 
         Ok((Dtype::F16, tensor.shape.clone(), data.into()))

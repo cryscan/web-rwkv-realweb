@@ -47,7 +47,7 @@ async function initReader(blob: Blob) {
             let info: TensorInfo = metadata[name];
             let start = 8 + n + info.data_offsets[0];
             let end = 8 + n + info.data_offsets[1];
-            let tensor = new Tensor(name, info.shape, blob.slice(start, end));
+            let tensor = new Tensor(name, info.shape, await blob.slice(start, end).arrayBuffer());
             tensors.push(tensor);
         }
     }
