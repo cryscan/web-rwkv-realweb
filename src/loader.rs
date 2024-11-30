@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use js_sys::{ArrayBuffer, Uint8Array};
 use safetensors::{Dtype, SafeTensorError};
 use wasm_bindgen::prelude::*;
-use web_rwkv::model::loader::{Reader, ReaderTensor};
+use web_rwkv::runtime::loader::{Reader, ReaderTensor};
 
 #[wasm_bindgen(js_name = Tensor)]
 #[derive(Debug, Clone)]

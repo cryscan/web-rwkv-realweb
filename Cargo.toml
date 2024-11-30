@@ -23,6 +23,7 @@ bytemuck = { version = "1.17", features = ["extern_crate_alloc"] }
 derive-getters = "0.5"
 fastrand = { version = "2.1", features = ['js'] }
 flume = "0.11"
+futures = "0.3.31"
 half = { version = "2.4", features = ["bytemuck"] }
 itertools = "0.13"
 js-sys = "0.3"
@@ -42,7 +43,7 @@ web-sys = { version = "0.3", features = ["Blob", "console"] }
 default-features = false
 features = ["web"]
 # path = "../web-rwkv"
-version = "0.8.19"
+version = "0.9.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

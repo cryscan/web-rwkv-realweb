@@ -1,6 +1,6 @@
 importScripts("./pkg/web_rwkv_realweb.js")
 
-const { Runtime, Sampler, StateId, Tensor, TensorReader } = wasm_bindgen;
+const { Session, Sampler, StateId, Tensor, TensorReader } = wasm_bindgen;
 
 function getUint64(dataview: DataView, byteOffset: number, littleEndian?: boolean) {
     // split 64-bit number into two 32-bit (4-byte) parts
@@ -64,7 +64,7 @@ async function initTokenizer() {
     return new wasm_bindgen.Tokenizer(vocab);
 }
 
-async function initRuntime(blob: Blob) {
+async function initSession(blob: Blob) {
     await wasm_bindgen("./pkg/web_rwkv_realweb_bg.wasm");
 
     // var req = await fetch("assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st");
@@ -72,29 +72,29 @@ async function initRuntime(blob: Blob) {
     // console.log("model: ", bin.byteLength);
 
     let reader = await initReader(blob);
-    let runtime = await new Runtime(reader, 0, 0, true);
+    let session = await new Session(reader, 0, 0);
     console.log("runtime loaded")
-    return runtime;
+    return session;
 }
 
 var _tokenizer = initTokenizer();
-var _runtime: undefined | Promise<wasm_bindgen.Runtime> = undefined;
+var _session: undefined | Promise<wasm_bindgen.Session> = undefined;
 
 this.addEventListener("message", async function (e: MessageEvent<Uint8Array[] | String>) {
     if (e.data instanceof Array) {
         let blob = new Blob(e.data);
-        _runtime = initRuntime(blob);
+        _session = initSession(blob);
         return;
     }
 
-    if (await _runtime === undefined) {
+    if (await _session === undefined) {
         this.postMessage(null);
         this.postMessage("Error: Model is not loaded.");
         return;
     }
 
     var tokenizer = await _tokenizer;
-    var runtime = await _runtime!;
+    var session = await _session!;
     var sampler = new Sampler(1.0, 0.5);
 
     var input = e.data;
@@ -111,14 +111,13 @@ this.addEventListener("message", async function (e: MessageEvent<Uint8Array[] | 
     var out = []
     console.log(`prompt length: ${tokens.length}`);
 
-    var logits = new Float32Array(65536);
     var probs = new Float32Array(65536);
 
     await this.navigator.locks.request("model", async (lock) => {
         this.postMessage(null);
         while (!response.includes("\n\n") && out.length < 500) {
-            await runtime.run_one(tokens, logits, state);
-            await runtime.softmax_one(logits, probs);
+            await session.run(tokens, probs, state);
+            // await runtime.softmax_one(logits, probs);
 
             let out_token = sampler.sample(probs);
             let word = decoder.decode(tokenizer.decode(new Uint16Array([out_token])));
