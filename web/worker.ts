@@ -1,4 +1,4 @@
-importScripts("./pkg/web_rwkv_realweb.js")
+importScripts("web_rwkv_realweb.js")
 
 const { Session, Sampler, StateId, Tensor, TensorReader } = wasm_bindgen;
 
@@ -56,16 +56,16 @@ async function initReader(blob: Blob) {
 }
 
 async function initTokenizer() {
-    await wasm_bindgen("./pkg/web_rwkv_realweb_bg.wasm");
+    await wasm_bindgen("web_rwkv_realweb_bg.wasm");
 
-    var req = await fetch("assets/rwkv_vocab_v20230424.json");
+    var req = await fetch("../assets/rwkv_vocab_v20230424.json");
     var vocab = await req.text();
     console.log("tokenizer: " + vocab.length);
     return new wasm_bindgen.Tokenizer(vocab);
 }
 
 async function initSession(blob: Blob) {
-    await wasm_bindgen("./pkg/web_rwkv_realweb_bg.wasm");
+    await wasm_bindgen("web_rwkv_realweb_bg.wasm");
 
     // var req = await fetch("assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st");
     // var bin = await req.arrayBuffer();

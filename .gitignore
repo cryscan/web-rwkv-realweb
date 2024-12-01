@@ -5,6 +5,3 @@
 /trace
 /.cargo
 /.github
-
-app.js
-worker.js

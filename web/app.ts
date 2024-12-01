@@ -15,10 +15,10 @@ async function load() {
 
     let response = await cache.match(url).then(async (value) => {
         if (value !== undefined) {
-            console.log("load cached model");
+            console.log("loaded cached model");
             return value;
         }
-        console.log("load uncached model");
+        console.log("loading uncached model...");
         let response = await fetch(url);
         cache.put(url, response.clone());
         return response;
@@ -58,7 +58,7 @@ async function load() {
     downloadElem.style.display = "none";
     chatElem.style.display = "";
 
-    var worker = new Worker('worker.js');
+    var worker = new Worker('web/worker.js');
     worker.onmessage = (e: MessageEvent<string | null>) => {
         e.data ? replyElem.innerText += e.data : replyElem.innerText = "";
     };
@@ -70,6 +70,7 @@ async function load() {
         const inputElem = document.getElementById("input") as HTMLInputElement;
         var input = new String(inputElem.value);
         worker.postMessage(input);
+        console.log("submit: " + input);
     });
 }
 

@@ -29,7 +29,6 @@ itertools = "0.13"
 js-sys = "0.3"
 lazy_static = "1.5"
 log = "0.4"
-pollster = "0.3"
 regex = "1.10"
 safetensors = "0.4"
 serde = { version = "1", features = ["derive"] }
