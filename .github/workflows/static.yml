@@ -49,12 +49,12 @@ jobs:
         run: |
           # RUSTFLAGS=--cfg=web_sys_unstable_apis wasm-pack build --release --target no-modules
           # npx tsc
-          ./build.bash
+          bash build.bash
       - name: Clean
         run: |
           rm -r src/
           rm -r target/
-          rm -r *.ts
+          rm -r web/*.ts
           rm -r *.cmd
           rm -r *.bash
       - name: Setup Pages
