@@ -11,7 +11,7 @@ use web_rwkv::{
     runtime::{
         infer::{InferInput, InferInputBatch, InferOption},
         loader::{Loader, Reader},
-        model::{Bundle, ContextAutoLimits, ModelBuilder, ModelVersion, Quant, State},
+        model::{Bundle, ContextAutoLimits, ModelBuilder, ModelInfo, ModelVersion, Quant, State},
         softmax::softmax_one,
         v4, v5, v6, Runtime, SimpleRuntime,
     },
@@ -37,6 +37,7 @@ impl StateId {
 
 pub struct Session {
     context: Context,
+    info: ModelInfo,
     runtime: Box<dyn Runtime>,
     state: Box<dyn State>,
     current: Cell<StateId>,
@@ -90,6 +91,7 @@ impl Session {
 
         Ok(Self {
             context,
+            info,
             runtime,
             state,
             current: Cell::new(StateId::new()),
@@ -172,5 +174,9 @@ impl SessionExport {
         let data = self.0.run(tokens, state).await.map_err(err)?;
         output.copy_from_slice(&data);
         Ok(())
+    }
+
+    pub fn info(&self) -> ModelInfo {
+        self.0.info.clone()
     }
 }

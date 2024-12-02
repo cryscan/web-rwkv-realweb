@@ -1,6 +1,6 @@
 importScripts("web_rwkv_realweb.js")
 
-const { Session, Sampler, StateId, Tensor, TensorReader } = wasm_bindgen;
+const { Session, NucleusSampler, StateId, Tensor, TensorReader } = wasm_bindgen;
 
 function getUint64(dataview: DataView, byteOffset: number, littleEndian?: boolean) {
     // split 64-bit number into two 32-bit (4-byte) parts
@@ -95,7 +95,8 @@ this.addEventListener("message", async function (e: MessageEvent<Uint8Array[] | 
 
     var tokenizer = await _tokenizer;
     var session = await _session!;
-    var sampler = new Sampler(1.0, 0.5);
+    var info = session.info();
+    var sampler = new NucleusSampler(info, 1.0, 0.5);
 
     var input = e.data;
     console.log(input);

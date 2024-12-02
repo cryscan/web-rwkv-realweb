@@ -1,31 +1,52 @@
 use itertools::Itertools;
 use wasm_bindgen::prelude::*;
+use web_rwkv::runtime::model::ModelInfo;
 
 #[wasm_bindgen]
-pub struct Sampler {
-    pub temp: f32,
-    pub top_p: f32,
+#[derive(Debug, Clone)]
+pub struct SimpleSampler {
+    info: ModelInfo,
 }
 
-impl Default for Sampler {
-    fn default() -> Self {
-        Self {
-            temp: 1.0,
-            top_p: 0.5,
-        }
+#[wasm_bindgen]
+impl SimpleSampler {
+    #[wasm_bindgen(constructor)]
+    pub fn new(info: ModelInfo) -> Self {
+        Self { info }
+    }
+
+    pub fn sample(&self, probs: &[f32]) -> u16 {
+        let token = probs
+            .iter()
+            .take(self.info.num_vocab)
+            .copied()
+            .enumerate()
+            .max_by(|(_, x), (_, y)| x.total_cmp(y))
+            .map(|(id, _)| id)
+            .unwrap_or_default();
+        token as u16
     }
 }
 
 #[wasm_bindgen]
-impl Sampler {
+#[derive(Debug, Clone)]
+pub struct NucleusSampler {
+    info: ModelInfo,
+    pub temp: f32,
+    pub top_p: f32,
+}
+
+#[wasm_bindgen]
+impl NucleusSampler {
     #[wasm_bindgen(constructor)]
-    pub fn new(temp: f32, top_p: f32) -> Sampler {
-        Self { temp, top_p }
+    pub fn new(info: ModelInfo, temp: f32, top_p: f32) -> Self {
+        Self { info, temp, top_p }
     }
 
     pub fn sample(&self, probs: &[f32]) -> u16 {
         let sorted: Vec<_> = probs
             .iter()
+            .take(self.info.num_vocab)
             .copied()
             .enumerate()
             .sorted_unstable_by(|(_, x), (_, y)| x.total_cmp(y).reverse())
