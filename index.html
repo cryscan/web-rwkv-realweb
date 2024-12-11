@@ -22,18 +22,11 @@
                 <td>File size</td>
             </tr>
             <tr>
-                <td>RWKV-4-World-0.4B-v1-20230529-ctx4096</td>
+                <td>RWKV-x060-World-1B6-v2.1-20240328-ctx4096</td>
                 <td>HuggingFace</td>
-                <td>0.4 B</td>
-                <td>923 MB</td>
-                <td><button onclick="loadUrl('v4')">Link</button></td>
-            </tr>
-            <tr>
-                <td>RWKV-5-World-0.4B-v2-20231113-ctx4096</td>
-                <td>HuggingFace</td>
-                <td>0.4 B</td>
-                <td>923 MB</td>
-                <td><button onclick="loadUrl('v5')">Link</button></td>
+                <td>1.6 B</td>
+                <td>3.2 GB</td>
+                <td><button onclick="loadUrl('v6 1b6')">Link</button></td>
             </tr>
             <tr>
                 <td>RWKV-5-World-1B5-v2-20231025-ctx4096</td>
@@ -43,11 +36,25 @@
                 <td><button onclick="loadUrl('v5 1b5')">Link</button></td>
             </tr>
             <tr>
-                <td>RWKV-x060-World-1B6-v2.1-20240328-ctx4096</td>
+                <td>RWKV-5-World-0.4B-v2-20231113-ctx4096</td>
                 <td>HuggingFace</td>
-                <td>1.6 B</td>
-                <td>3.2 GB</td>
-                <td><button onclick="loadUrl('v6 1b6')">Link</button></td>
+                <td>0.4 B</td>
+                <td>923 MB</td>
+                <td><button onclick="loadUrl('v5')">Link</button></td>
+            </tr>
+            <tr>
+                <td>RWKV-4-World-0.4B-v1-20230529-ctx4096</td>
+                <td>HuggingFace</td>
+                <td>0.4 B</td>
+                <td>923 MB</td>
+                <td><button onclick="loadUrl('v4')">Link</button></td>
+            </tr>
+            <tr>
+                <td>RWKV-x070-World-0.1B-v2.8-20241210-ctx4096</td>
+                <td>Local Server</td>
+                <td>0.1 B</td>
+                <td>364 MB</td>
+                <td><button onclick="loadUrl('v7 local')">Link</button></td>
             </tr>
             <tr>
                 <td>RWKV-x060-World-1B6-v2-20240208-ctx4096</td>
@@ -79,7 +86,7 @@
             link to the model file. I.e. it must contain <b>/resolve/</b>, not /blob/ and must end in <i>.st</i></div>
         <div style="background:lightgrey; padding:0.5rem; width:fit-content;">
             <input id="url" style="width:700px"
-                value="https://huggingface.co/cgisky/AI00_RWKV_V5/resolve/main/RWKV-5-World-0.4B-v2-20231113-ctx4096.st">
+                value="http://localhost:5500/assets/models/RWKV-x070-World-0.1B-v2.8-20241210-ctx4096.st">
             <!-- value="http://localhost:5500/assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st"> -->
             <!-- value="http://localhost:5500/assets/models/RWKV-x060-World-1B6-v2-20240208-ctx4096.st"> -->
             <button id="load" onclick="load()">Load</button>

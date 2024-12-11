@@ -42,7 +42,7 @@ web-sys = { version = "0.3", features = ["Blob", "console"] }
 default-features = false
 features = ["web"]
 # path = "../web-rwkv"
-version = "0.9.1"
+version = "0.9.5"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

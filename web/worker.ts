@@ -20,6 +20,7 @@ this.addEventListener("message", async function (e: MessageEvent<Uint8Array[] | 
     var session = await _session!;
     var info = session.info();
     var sampler = new NucleusSampler(info, 1.0, 0.5);
+    console.log(info);
 
     var input = e.data;
     console.log(input);

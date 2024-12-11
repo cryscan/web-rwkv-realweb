@@ -13,7 +13,7 @@ use web_rwkv::{
         loader::{Loader, Reader},
         model::{Bundle, ContextAutoLimits, ModelBuilder, ModelInfo, ModelVersion, Quant, State},
         softmax::softmax_one,
-        v4, v5, v6, Runtime, SimpleRuntime,
+        v4, v5, v6, v7, Runtime, SimpleRuntime,
     },
     tensor::TensorCpu,
     wgpu::{Instance, PowerPreference},
@@ -86,7 +86,13 @@ impl Session {
                 let runtime = SimpleRuntime::new(bundle);
                 (Box::new(runtime), Box::new(state))
             }
-            ModelVersion::V7 => todo!(),
+            ModelVersion::V7 => {
+                let model = builder.build_v7().await?;
+                let bundle = v7::Bundle::<f16>::new(model, 1);
+                let state = bundle.state();
+                let runtime = SimpleRuntime::new(bundle);
+                (Box::new(runtime), Box::new(state))
+            }
         };
 
         Ok(Self {
