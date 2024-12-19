@@ -4,9 +4,4 @@
 *.safetensors
 /trace
 /.cargo
-# /.github
-
-/node_modules
-/dist
-/build
-/public
+/.github
