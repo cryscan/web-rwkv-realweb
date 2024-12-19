@@ -6,6 +6,18 @@ Check the [live demo](https://cryscan.github.io/web-rwkv-realweb/)!
 
 ## Development
 
+### File structure
+
+```bash
+.
+├── assets # static files
+├── node_modules
+├── src # ts code for web
+├── index.html # web entry point
+└── web-rwkv-realweb # rust code
+    └── src
+```
+
 ### `rust` and `wasm-pack` setup
 
 To install `wasm-pack`, use
@@ -17,7 +29,7 @@ cargo install wasm-pack
 
 ### Project setup
 
-We use [pnpm](https://pnpm.io) to manage the packages. To install the project dependencies, use:
+We use [pnpm](https://pnpm.io) to manage the node packages. To install the project dependencies, use:
 
 ```bash
 pnpm install
