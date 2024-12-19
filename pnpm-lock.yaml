@@ -24,9 +24,6 @@ importers:
       vite-plugin-wasm-pack:
         specifier: ^0.1.12
         version: 0.1.12
-      vite-plugin-watch:
-        specifier: ^0.3.1
-        version: 0.3.1
 
 packages:
 
@@ -286,12 +283,6 @@ packages:
     resolution: {integrity: sha512-zbB9rCJAT1rbjiVDb2hqKFHNYLxgtk8NURxZ3IZwD3F6NtxbXZQCnnSi1Lkx+IDohdPlFp222wVALIheZJQSEg==, tarball: https://registry.npmmirror.com/ansi-styles/-/ansi-styles-4.3.0.tgz}
     engines: {node: '>=8'}
 
-  balanced-match@1.0.2:
-    resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==, tarball: https://registry.npmmirror.com/balanced-match/-/balanced-match-1.0.2.tgz}
-
-  brace-expansion@2.0.1:
-    resolution: {integrity: sha512-XnAIvQ8eM+kC6aULx6wuQiwVsnzsi9d3WxzV3FpWTGA19F621kwdbsAcFKXgKUHZWsy+mY6iL1sHTxWEFCytDA==, tarball: https://registry.npmmirror.com/brace-expansion/-/brace-expansion-2.0.1.tgz}
-
   chalk@4.1.2:
     resolution: {integrity: sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA==, tarball: https://registry.npmmirror.com/chalk/-/chalk-4.1.2.tgz}
     engines: {node: '>=10'}
@@ -338,10 +329,6 @@ packages:
 
   jsonfile@6.1.0:
     resolution: {integrity: sha512-5dgndWOriYSm5cnYaJNhalLNDKOqFwyDB/rr1E9ZsGciGvKPs8R2xYGCacuf3z6K1YKDz182fd+fY3cn3pMqXQ==, tarball: https://registry.npmmirror.com/jsonfile/-/jsonfile-6.1.0.tgz}
-
-  minimatch@5.1.6:
-    resolution: {integrity: sha512-lKwV/1brpG6mBUFHtb7NUmtABCb2WZZmm2wNiOA5hAb8VdCS4B3dtMWyvcoViccwAW/COERjXLt0zP1zXUN26g==, tarball: https://registry.npmmirror.com/minimatch/-/minimatch-5.1.6.tgz}
-    engines: {node: '>=10'}
 
   nanoid@3.3.8:
     resolution: {integrity: sha512-WNLf5Sd8oZxOm+TzppcYk8gVOgP+l58xNy58D0nbUnOxOWRWvlcCV4kUF7ltmI6PsrLl/BgKEyS4mqsGChFN0w==, tarball: https://registry.npmmirror.com/nanoid/-/nanoid-3.3.8.tgz}
@@ -401,10 +388,6 @@ packages:
 
   vite-plugin-wasm-pack@0.1.12:
     resolution: {integrity: sha512-WliYvQp9HXluir4OKGbngkcKxtYtifU11cqLurRRJGsl770Sjr1iIkp5RuvU3IC1poT4A57Z2/YgAKI2Skm7ZA==, tarball: https://registry.npmmirror.com/vite-plugin-wasm-pack/-/vite-plugin-wasm-pack-0.1.12.tgz}
-
-  vite-plugin-watch@0.3.1:
-    resolution: {integrity: sha512-tmLJ5tqSqXY7wSXoM8+huOgbictUG6SKLh/tZ6LAY51KPSAnPBr0dYwyxPPPQm+JgIIBbKSyNnPHpW11ad+qlw==, tarball: https://registry.npmmirror.com/vite-plugin-watch/-/vite-plugin-watch-0.3.1.tgz}
-    engines: {node: '>=10.6.0'}
 
   vite@6.0.4:
     resolution: {integrity: sha512-zwlH6ar+6o6b4Wp+ydhtIKLrGM/LoqZzcdVmkGAFun0KHTzIzjh+h0kungEx7KJg/PYnC80I4TII9WkjciSR6Q==, tarball: https://registry.npmmirror.com/vite/-/vite-6.0.4.tgz}
@@ -588,12 +571,6 @@ snapshots:
     dependencies:
       color-convert: 2.0.1
 
-  balanced-match@1.0.2: {}
-
-  brace-expansion@2.0.1:
-    dependencies:
-      balanced-match: 1.0.2
-
   chalk@4.1.2:
     dependencies:
       ansi-styles: 4.3.0
@@ -663,10 +640,6 @@ snapshots:
     optionalDependencies:
       graceful-fs: 4.2.11
 
-  minimatch@5.1.6:
-    dependencies:
-      brace-expansion: 2.0.1
-
   nanoid@3.3.8: {}
 
   narrowing@1.5.0: {}
@@ -734,10 +707,6 @@ snapshots:
       chalk: 4.1.2
       fs-extra: 10.1.0
       narrowing: 1.5.0
-
-  vite-plugin-watch@0.3.1:
-    dependencies:
-      minimatch: 5.1.6
 
   vite@6.0.4:
     dependencies:
