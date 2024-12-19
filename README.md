@@ -4,34 +4,59 @@ Run the RWKV model locally in browser on your GPU. This demo is built upon the [
 
 Check the [live demo](https://cryscan.github.io/web-rwkv-realweb/)!
 
-## Dependencies
+## Development
 
-### `node.js` and `typescript`
+### File structure
 
-To install `typescript`, use
 ```bash
-$ npm install -g typescript
+.
+├── assets # static files
+├── node_modules
+├── src # ts code for web
+├── index.html # web entry point
+└── web-rwkv-realweb # rust code
+    └── src
 ```
 
-### `rust` and `wasm-pack`
+### `rust` and `wasm-pack` setup
 
 To install `wasm-pack`, use
+
 ```bash
-$ cargo install wasm-pack
+cd web-rwkv-realweb
+cargo install wasm-pack
 ```
 
-### Model Download
+### Project setup
 
-Download the model [here](https://huggingface.co/cgisky/AI00_RWKV_V5/blob/main/RWKV-5-World-0.4B-v2-20231113-ctx4096.st),
-and put it under `assets/models`.
+We use [pnpm](https://pnpm.io) to manage the node packages. To install the project dependencies, use:
 
-## Compile and Pack
-
-To build and pack, run
 ```bash
-$ ./build.cmd
+pnpm install
 ```
 
-## Run
+### Run & Build
 
-Start a local http server to serve the folder, open the page in your browser.
+To run the development server, use:
+
+```bash
+pnpm run dev
+```
+
+To build wasm package only, use:
+
+```bash
+pnpm run wasm:build
+```
+
+To build the project, use:
+
+```bash
+pnpm run build
+pnpm run preview
+```
+
+## Available Models
+
+You can find the available models on [cryscan's huggingface page](https://huggingface.co/cgisky).
+The model files name should end in `.st`.
