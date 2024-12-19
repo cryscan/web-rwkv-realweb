@@ -1,111 +1,132 @@
 <html>
-
-<head>
+  <head>
     <title>Web RWKV RealWeb</title>
     <h1>Web-RWKV In-Browser</h1>
-    <div style="max-width:750px; margin-top:1rem;">
-        <p>Welcome to the Web-RWKV demo in browser!
-            Check <a href="https://github.com/cryscan/web-rwkv-realweb" target="_blank">the Github repo</a> for more
-            details
-            about this demo.</p>
-        <p>Note that this demo runs on WebGPU so make sure that your browser support it before running (See <a
-                href="https://webgpureport.org/" target="_blank">WebGPU Report</a>).</p>
-        <p>Thanks to <a href="https://github.com/josephrocca/rwkv-v4-web" target="_blank">josephrocca</a> for the first
-            awesome in-browser implementation and the website (I am totally unfamiliar with web dev LoL).</p>
+    <div style="max-width: 750px; margin-top: 1rem">
+      <p>
+        Welcome to the Web-RWKV demo in browser! Check
+        <a href="https://github.com/cryscan/web-rwkv-realweb" target="_blank"
+          >the Github repo</a
+        >
+        for more details about this demo.
+      </p>
+      <p>
+        Note that this demo runs on WebGPU so make sure that your browser
+        support it before running (See
+        <a href="https://webgpureport.org/" target="_blank">WebGPU Report</a>).
+      </p>
+      <p>
+        Thanks to
+        <a href="https://github.com/josephrocca/rwkv-v4-web" target="_blank"
+          >josephrocca</a
+        >
+        for the first awesome in-browser implementation and the website (I am
+        totally unfamiliar with web dev LoL).
+      </p>
     </div>
     <div id="model">
-        <table id="modelTable">
-            <tr style="font-weight:bold;">
-                <td>Name</td>
-                <td>Source</td>
-                <td>Params</td>
-                <td>File size</td>
-            </tr>
-            <tr>
-                <td>RWKV-x060-World-1B6-v2.1-20240328-ctx4096</td>
-                <td>HuggingFace</td>
-                <td>1.6 B</td>
-                <td>3.2 GB</td>
-                <td><button onclick="loadUrl('v6 1b6')">Link</button></td>
-            </tr>
-            <tr>
-                <td>RWKV-5-World-1B5-v2-20231025-ctx4096</td>
-                <td>HuggingFace</td>
-                <td>1.5 B</td>
-                <td>3.16 GB</td>
-                <td><button onclick="loadUrl('v5 1b5')">Link</button></td>
-            </tr>
-            <tr>
-                <td>RWKV-5-World-0.4B-v2-20231113-ctx4096</td>
-                <td>HuggingFace</td>
-                <td>0.4 B</td>
-                <td>923 MB</td>
-                <td><button onclick="loadUrl('v5')">Link</button></td>
-            </tr>
-            <tr>
-                <td>RWKV-4-World-0.4B-v1-20230529-ctx4096</td>
-                <td>HuggingFace</td>
-                <td>0.4 B</td>
-                <td>923 MB</td>
-                <td><button onclick="loadUrl('v4')">Link</button></td>
-            </tr>
-            <tr>
-                <td>RWKV-x070-World-0.1B-v2.8-20241210-ctx4096</td>
-                <td>Local Server</td>
-                <td>0.1 B</td>
-                <td>364 MB</td>
-                <td><button onclick="loadUrl('v7 local')">Link</button></td>
-            </tr>
-            <tr>
-                <td>RWKV-x060-World-1B6-v2-20240208-ctx4096</td>
-                <td>Local Server</td>
-                <td>1.6 B</td>
-                <td>3.2 GB</td>
-                <td><button onclick="loadUrl('v6 local')">Link</button></td>
-            </tr>
-            <tr>
-                <td>RWKV-5-World-0.4B-v2-20231113-ctx4096</td>
-                <td>Local Server</td>
-                <td>0.4 B</td>
-                <td>923 MB</td>
-                <td><button onclick="loadUrl('v5 local')">Link</button></td>
-            </tr>
-        </table>
-        <style>
-            #modelTable {
-                border-collapse: collapse;
-                margin-top: 1rem;
-            }
+      <table id="modelTable">
+        <tr style="font-weight: bold">
+          <td>Name</td>
+          <td>Source</td>
+          <td>Params</td>
+          <td>File size</td>
+        </tr>
+        <tr>
+          <td>RWKV-x060-World-1B6-v2.1-20240328-ctx4096</td>
+          <td>HuggingFace</td>
+          <td>1.6 B</td>
+          <td>3.2 GB</td>
+          <td><button onclick="loadUrl('v6 1b6')">Link</button></td>
+        </tr>
+        <tr>
+          <td>RWKV-5-World-1B5-v2-20231025-ctx4096</td>
+          <td>HuggingFace</td>
+          <td>1.5 B</td>
+          <td>3.16 GB</td>
+          <td><button onclick="loadUrl('v5 1b5')">Link</button></td>
+        </tr>
+        <tr>
+          <td>RWKV-5-World-0.4B-v2-20231113-ctx4096</td>
+          <td>HuggingFace</td>
+          <td>0.4 B</td>
+          <td>923 MB</td>
+          <td><button onclick="loadUrl('v5')">Link</button></td>
+        </tr>
+        <tr>
+          <td>RWKV-4-World-0.4B-v1-20230529-ctx4096</td>
+          <td>HuggingFace</td>
+          <td>0.4 B</td>
+          <td>923 MB</td>
+          <td><button onclick="loadUrl('v4')">Link</button></td>
+        </tr>
+        <tr>
+          <td>RWKV-x070-World-0.1B-v2.8-20241210-ctx4096</td>
+          <td>Local Server</td>
+          <td>0.1 B</td>
+          <td>364 MB</td>
+          <td><button onclick="loadUrl('v7 local')">Link</button></td>
+        </tr>
+        <tr>
+          <td>RWKV-x060-World-1B6-v2-20240208-ctx4096</td>
+          <td>Local Server</td>
+          <td>1.6 B</td>
+          <td>3.2 GB</td>
+          <td><button onclick="loadUrl('v6 local')">Link</button></td>
+        </tr>
+        <tr>
+          <td>RWKV-5-World-0.4B-v2-20231113-ctx4096</td>
+          <td>Local Server</td>
+          <td>0.4 B</td>
+          <td>923 MB</td>
+          <td><button onclick="loadUrl('v5 local')">Link</button></td>
+        </tr>
+      </table>
+      <style>
+        #modelTable {
+          border-collapse: collapse;
+          margin-top: 1rem;
+        }
 
-            #modelTable td,
-            #modelTable th {
-                border: 1px solid grey;
-            }
-        </style>
-        <div style="max-width:750px; margin-top:1rem;">Load model using a model URL. The URL must be a <u>direct</u>
-            link to the model file. I.e. it must contain <b>/resolve/</b>, not /blob/ and must end in <i>.st</i></div>
-        <div style="background:lightgrey; padding:0.5rem; width:fit-content;">
-            <input id="url" style="width:700px"
-                value="http://localhost:5500/assets/models/RWKV-x070-World-0.1B-v2.8-20241210-ctx4096.st">
-            <!-- value="http://localhost:5500/assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st"> -->
-            <!-- value="http://localhost:5500/assets/models/RWKV-x060-World-1B6-v2-20240208-ctx4096.st"> -->
-            <button id="load" onclick="load()">Load</button>
-        </div>
+        #modelTable td,
+        #modelTable th {
+          border: 1px solid grey;
+        }
+      </style>
+      <div style="max-width: 750px; margin-top: 1rem">
+        Load model using a model URL. The URL must be a <u>direct</u> link to
+        the model file. I.e. it must contain <b>/resolve/</b>, not /blob/ and
+        must end in <i>.st</i>
+      </div>
+      <div style="background: lightgrey; padding: 0.5rem; width: fit-content">
+        <input
+          id="url"
+          style="width: 700px"
+          value="http://localhost:5500/assets/models/RWKV-x070-World-0.1B-v2.8-20241210-ctx4096.st"
+        />
+        <!-- value="http://localhost:5500/assets/models/RWKV-5-World-0.4B-v2-20231113-ctx4096.st"> -->
+        <!-- value="http://localhost:5500/assets/models/RWKV-x060-World-1B6-v2-20240208-ctx4096.st"> -->
+        <button id="load" onclick="load()">Load</button>
+      </div>
     </div>
-    <div id="download" style="display: none;">
-        <div id="status">Initializing...</div>
-        <progress id="progress" value="1"></progress>
+    <div id="download" style="display: none">
+      <div id="status">Initializing...</div>
+      <progress id="progress" value="1"></progress>
     </div>
-    <div style="max-width:750px; margin-top:1rem;">
-        <form id="chat" style="display: none;">
-            <label>Enter your message:</label>
-            <input type="text" id="input" name="message" style="width:500px;" value="Where is the Eiffel Tower?">
-            <button type="submit">Submit</button>
-        </form>
+    <div style="max-width: 750px; margin-top: 1rem">
+      <form id="chat" style="display: none">
+        <label>Enter your message:</label>
+        <input
+          type="text"
+          id="input"
+          name="message"
+          style="width: 500px"
+          value="Where is the Eiffel Tower?"
+        />
+        <button type="submit">Submit</button>
+      </form>
     </div>
-    <div style="max-width:750px; margin-top:1rem;" id="reply"></div>
-    <script src="web/web_rwkv_realweb.js"></script>
-    <script src="web/app.js"></script>
-</head>
-
+    <div style="max-width: 750px; margin-top: 1rem" id="reply"></div>
+    <script type="module" src="./src/app.ts"></script>
+  </head>
 </html>
