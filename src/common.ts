@@ -104,7 +104,6 @@ export async function initSession(blob: Blob) {
 export async function* pipeline(
   session: Session,
   tokens: Uint16Array,
-  state: StateId,
   sampler: SimpleSampler | NucleusSampler,
   stop_tokens: number[],
   max_len: number
@@ -112,13 +111,13 @@ export async function* pipeline(
   var probs = new Float32Array(65536);
 
   for (var i = 0; i < max_len; ++i) {
-    await session.run(tokens, probs, state);
+    await session.run(tokens, probs);
     let token = sampler.sample(probs);
     tokens = new Uint16Array([token]);
 
     yield token;
 
-    if (token in stop_tokens) {
+    if (stop_tokens.includes(token)) {
       return;
     }
   }

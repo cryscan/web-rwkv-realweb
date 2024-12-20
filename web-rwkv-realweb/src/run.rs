@@ -1,8 +1,3 @@
-use std::{
-    cell::{Cell, RefCell},
-    collections::HashMap,
-};
-
 use anyhow::Result;
 use half::f16;
 use wasm_bindgen::prelude::*;
@@ -15,7 +10,7 @@ use web_rwkv::{
         softmax::softmax_one,
         v4, v5, v6, v7, Runtime, SimpleRuntime,
     },
-    tensor::TensorCpu,
+    tensor::{TensorCpu, TensorShape},
     wgpu::{Instance, PowerPreference},
 };
 
@@ -23,25 +18,11 @@ use crate::loader::TensorReader;
 
 pub const TOKEN_CHUNK_SIZE: usize = 128;
 
-#[wasm_bindgen]
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct StateId(uid::Id<StateId>);
-
-#[wasm_bindgen]
-impl StateId {
-    #[wasm_bindgen(constructor)]
-    pub fn new() -> Self {
-        Self(uid::Id::new())
-    }
-}
-
 pub struct Session {
     context: Context,
     info: ModelInfo,
     runtime: Box<dyn Runtime>,
     state: Box<dyn State>,
-    current: Cell<StateId>,
-    backed: RefCell<HashMap<StateId, TensorCpu<f32>>>,
 }
 
 impl Session {
@@ -100,37 +81,20 @@ impl Session {
             info,
             runtime,
             state,
-            current: Cell::new(StateId::new()),
-            backed: RefCell::new(HashMap::new()),
         })
     }
 
-    async fn back(&self) -> Result<()> {
-        let id = self.current.get();
-        let backed = self.state.back(0).await?;
-        self.backed.borrow_mut().insert(id, backed);
-        Ok(())
+    pub async fn back(&self) -> Result<TensorCpu<f32>> {
+        Ok(self.state.back(0).await?)
     }
 
-    async fn checkout(&self, id: StateId) -> Result<()> {
-        if self.current.get() == id {
-            return Ok(());
-        }
-
-        self.back().await?;
-        self.current.set(id);
-
-        let backed = self.backed.borrow();
-        match backed.get(&id) {
-            Some(backed) => self.state.load(backed.clone(), 0)?,
-            None => self.state.load(self.state.init(), 0)?,
-        }
-
-        Ok(())
+    pub fn load(&self, backed: TensorCpu<f32>) -> Result<()> {
+        Ok(self.state.load(backed, 0)?)
     }
 
-    pub async fn run(&self, tokens: &[u16], state: &StateId) -> Result<Vec<f32>> {
-        self.checkout(*state).await?;
+    pub async fn run(&self, tokens: &[u16]) -> Result<Vec<f32>> {
+        // let backed = self.backed.borrow().clone();
+        // self.state.load(backed, 0)?;
 
         let tokens = tokens.to_owned();
         let mut inference = Some(InferInput::new(
@@ -152,6 +116,9 @@ impl Session {
                 break output.to_vec();
             }
         };
+
+        // self.backed.replace(self.state.back(0).await?);
+
         Ok(output)
     }
 }
@@ -171,18 +138,30 @@ impl SessionExport {
         Ok(Self(session))
     }
 
-    pub async fn run(
-        &self,
-        tokens: &[u16],
-        output: &mut [f32],
-        state: &StateId,
-    ) -> Result<(), JsError> {
-        let data = self.0.run(tokens, state).await.map_err(err)?;
-        output.copy_from_slice(&data);
+    pub async fn run(&self, tokens: &[u16], output: &mut [f32]) -> Result<(), JsError> {
+        let data = self.0.run(tokens).await.map_err(err)?;
+        output.copy_from_slice(&data[..output.len()]);
         Ok(())
     }
 
     pub fn info(&self) -> ModelInfo {
         self.0.info.clone()
+    }
+
+    pub fn state_len(&self) -> usize {
+        self.0.state.init().len()
+    }
+
+    pub async fn back(&self, backed: &mut [f32]) -> Result<(), JsError> {
+        let data = self.0.back().await.map_err(err)?.to_vec();
+        assert_eq!(data.len(), backed.len());
+        backed.copy_from_slice(&data);
+        Ok(())
+    }
+
+    pub fn load(&self, backed: &[f32]) -> Result<(), JsError> {
+        let shape = self.0.state.init().shape();
+        let backed = self.0.context.tensor_from_data(shape, backed.to_vec())?;
+        self.0.load(backed).map_err(err)
     }
 }

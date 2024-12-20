@@ -1,8 +1,9 @@
 import { initSession, initTokenizer, pipeline } from "./common";
-import { Session, NucleusSampler, StateId } from "web-rwkv-realweb";
+import { Session, NucleusSampler } from "web-rwkv-realweb";
 
 var _tokenizer = initTokenizer();
 var _session: undefined | Promise<Session> = undefined;
+var _state: undefined | Float32Array = undefined;
 
 self.addEventListener(
   "message",
@@ -25,11 +26,17 @@ self.addEventListener(
     var sampler = new NucleusSampler(info, 1.0, 0.5);
     console.log(info);
 
+    if (_state === undefined) {
+      _state = new Float32Array(session.state_len());
+      await session.back(_state);
+    } else {
+      session.load(_state);
+    }
+
     var input = e.data;
     console.log(input);
 
     var prompt = `User: Hi!\n\nAssistant: Hello! I'm your AI assistant. I'm here to help you with various tasks, such as answering questions, brainstorming ideas, drafting emails, writing code, providing advice, and much more.\n\nUser: ${input}\n\nAssistant:`;
-    var state = new StateId();
 
     var encoder = new TextEncoder();
     var decoder = new TextDecoder();
@@ -41,7 +48,7 @@ self.addEventListener(
     console.log(`prompt length: ${tokens.length}`);
 
     await this.navigator.locks.request("model", async (lock) => {
-      let p = pipeline(session, tokens, state, sampler, [], 500);
+      let p = pipeline(session, tokens, sampler, [], 500);
 
       this.postMessage(null);
 

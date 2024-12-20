@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "wasm:build": "cross-env RUSTFLAGS=--cfg=web_sys_unstable_apis wasm-pack build ./web-rwkv-realweb --release --target web",
+    "wasm:build": "cross-env wasm-pack build ./web-rwkv-realweb --release --target web",
     "dev": "pnpm run wasm:build && vite",
     "build": "pnpm run wasm:build && vite build",
     "preview": "vite preview"
