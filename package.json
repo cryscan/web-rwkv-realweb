@@ -1,0 +1,25 @@
+{
+  "name": "web-rwkv-realweb",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "wasm:build": "cross-env wasm-pack build ./web-rwkv-realweb --release --target web",
+    "dev": "pnpm run wasm:build && vite",
+    "build": "pnpm run wasm:build && vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3",
+    "vite": "^6.0.4",
+    "vite-plugin-wasm-pack": "^0.1.12"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
