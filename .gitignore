@@ -1,12 +1,12 @@
 /target
 /.vscode
-*.st
-*.safetensors
-/trace
 /.cargo
-# /.github
 
 /node_modules
 /dist
 /build
 /public
+/trace
+
+*.st
+*.safetensors

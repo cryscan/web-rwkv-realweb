@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use itertools::Itertools;
 use wasm_bindgen::prelude::*;
 use web_rwkv::runtime::model::ModelInfo;
@@ -15,6 +17,10 @@ impl SimpleSampler {
         Self { info }
     }
 
+    pub fn update(&mut self, _tokens: &[u16]) {}
+
+    pub fn transform(&self, _logits: &mut [f32]) {}
+
     pub fn sample(&self, probs: &[f32]) -> u16 {
         let token = probs
             .iter()
@@ -31,16 +37,56 @@ impl SimpleSampler {
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
 pub struct NucleusSampler {
-    info: ModelInfo,
     pub temp: f32,
     pub top_p: f32,
+    pub presence_penalty: f32,
+    pub count_penalty: f32,
+    pub penalty_decay: f32,
+
+    info: ModelInfo,
+    state: HashMap<u16, f32>,
 }
 
 #[wasm_bindgen]
 impl NucleusSampler {
     #[wasm_bindgen(constructor)]
-    pub fn new(info: ModelInfo, temp: f32, top_p: f32) -> Self {
-        Self { info, temp, top_p }
+    pub fn new(
+        info: ModelInfo,
+        temp: f32,
+        top_p: f32,
+        presence_penalty: f32,
+        count_penalty: f32,
+        penalty_decay: f32,
+    ) -> Self {
+        Self {
+            temp,
+            top_p,
+            presence_penalty,
+            count_penalty,
+            penalty_decay,
+            info,
+            state: Default::default(),
+        }
+    }
+
+    pub fn update(&mut self, tokens: &[u16]) {
+        for token in tokens {
+            match self.state.get_mut(token) {
+                Some(count) => *count += 1.0,
+                None => {
+                    self.state.insert(*token, 1.0);
+                }
+            }
+        }
+        for count in self.state.values_mut() {
+            *count *= self.penalty_decay;
+        }
+    }
+
+    pub fn transform(&self, logits: &mut [f32]) {
+        for (&token, &count) in self.state.iter() {
+            logits[token as usize] -= self.presence_penalty + self.count_penalty * count;
+        }
     }
 
     pub fn sample(&self, probs: &[f32]) -> u16 {

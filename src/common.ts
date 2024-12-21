@@ -2,7 +2,6 @@ import wasm_bindgen, {
   Session,
   NucleusSampler,
   SimpleSampler,
-  StateId,
   Tensor,
   TensorReader,
   Tokenizer,
@@ -101,24 +100,25 @@ export async function initSession(blob: Blob) {
   return session;
 }
 
-export async function* pipeline(
-  session: Session,
-  tokens: Uint16Array,
-  sampler: SimpleSampler | NucleusSampler,
-  stop_tokens: number[],
-  max_len: number
-) {
-  var probs = new Float32Array(65536);
+export async function* pipeline(session: Session, tokens: Uint16Array, sampler: SimpleSampler | NucleusSampler, stop_tokens: number[], max_len: number) {
+  let info = session.info();
+  let logits = new Float32Array(info.num_vocab);
+  let probs = new Float32Array(info.num_vocab);
 
   for (var i = 0; i < max_len; ++i) {
-    await session.run(tokens, probs);
+    await session.run(tokens, logits);
+
+    sampler.transform(logits);
+    await session.softmax(logits, probs);
+
     let token = sampler.sample(probs);
     tokens = new Uint16Array([token]);
+    sampler.update(tokens);
 
     yield token;
 
     if (stop_tokens.includes(token)) {
-      return;
+      break;
     }
   }
 }

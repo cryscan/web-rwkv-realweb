@@ -23,7 +23,7 @@ self.addEventListener(
     var tokenizer = await _tokenizer;
     var session = await _session!;
     var info = session.info();
-    var sampler = new NucleusSampler(info, 1.0, 0.5);
+    var sampler = new NucleusSampler(info, 1.0, 0.5, 0.5, 0.5, 0.996);
     console.log(info);
 
     if (_state === undefined) {

@@ -10,7 +10,7 @@ use web_rwkv::{
         softmax::softmax_one,
         v4, v5, v6, v7, Runtime, SimpleRuntime,
     },
-    tensor::{TensorCpu, TensorShape},
+    tensor::TensorCpu,
     wgpu::{Instance, PowerPreference},
 };
 
@@ -92,10 +92,7 @@ impl Session {
         Ok(self.state.load(backed, 0)?)
     }
 
-    pub async fn run(&self, tokens: &[u16]) -> Result<Vec<f32>> {
-        // let backed = self.backed.borrow().clone();
-        // self.state.load(backed, 0)?;
-
+    pub async fn run(&self, tokens: &[u16]) -> Result<TensorCpu<f32>> {
         let tokens = tokens.to_owned();
         let mut inference = Some(InferInput::new(
             vec![InferInputBatch {
@@ -112,14 +109,15 @@ impl Session {
 
             let output = output[0].0.clone();
             if !output.is_empty() {
-                let output = softmax_one(&self.context, output).await?;
-                break output.to_vec();
+                break output;
             }
         };
 
-        // self.backed.replace(self.state.back(0).await?);
-
         Ok(output)
+    }
+
+    pub async fn softmax(&self, logits: TensorCpu<f32>) -> Result<TensorCpu<f32>> {
+        Ok(softmax_one(&self.context, logits).await?)
     }
 }
 
@@ -139,7 +137,19 @@ impl SessionExport {
     }
 
     pub async fn run(&self, tokens: &[u16], output: &mut [f32]) -> Result<(), JsError> {
-        let data = self.0.run(tokens).await.map_err(err)?;
+        let data = self.0.run(tokens).await.map_err(err)?.to_vec();
+        output.copy_from_slice(&data[..output.len()]);
+        Ok(())
+    }
+
+    pub async fn softmax(&self, input: &[f32], output: &mut [f32]) -> Result<(), JsError> {
+        assert_eq!(input.len(), output.len());
+        let input = self
+            .0
+            .context
+            .tensor_from_data([input.len(), 1, 1, 1], input.to_vec())
+            .map_err(err)?;
+        let data = self.0.softmax(input).await.map_err(err)?.to_vec();
         output.copy_from_slice(&data[..output.len()]);
         Ok(())
     }
@@ -149,7 +159,7 @@ impl SessionExport {
     }
 
     pub fn state_len(&self) -> usize {
-        self.0.state.init().len()
+        self.0.state.init_shape().len()
     }
 
     pub async fn back(&self, backed: &mut [f32]) -> Result<(), JsError> {
@@ -160,7 +170,7 @@ impl SessionExport {
     }
 
     pub fn load(&self, backed: &[f32]) -> Result<(), JsError> {
-        let shape = self.0.state.init().shape();
+        let shape = self.0.state.init_shape();
         let backed = self.0.context.tensor_from_data(shape, backed.to_vec())?;
         self.0.load(backed).map_err(err)
     }
