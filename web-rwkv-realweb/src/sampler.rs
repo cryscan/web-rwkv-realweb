@@ -13,7 +13,8 @@ pub struct SimpleSampler {
 #[wasm_bindgen]
 impl SimpleSampler {
     #[wasm_bindgen(constructor)]
-    pub fn new(info: ModelInfo) -> Self {
+    pub fn new(info: &ModelInfo) -> Self {
+        let info = info.clone();
         Self { info }
     }
 
@@ -51,7 +52,7 @@ pub struct NucleusSampler {
 impl NucleusSampler {
     #[wasm_bindgen(constructor)]
     pub fn new(
-        info: ModelInfo,
+        info: &ModelInfo,
         temp: f32,
         top_p: f32,
         presence_penalty: f32,
@@ -64,7 +65,7 @@ impl NucleusSampler {
             presence_penalty,
             count_penalty,
             penalty_decay,
-            info,
+            info: info.clone(),
             state: Default::default(),
         }
     }
